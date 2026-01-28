@@ -3,11 +3,12 @@
    ======================================== */
 
 :root {
-  --primary: #0B4F4A;
-  --primary-light: #1a7a73;
-  --primary-dark: #083b37;
-  --accent: #C67C2E;
-  --accent-light: #e09a4c;
+  --primary: #2E86AB;
+  --primary-light: #4A9EC4;
+  --primary-dark: #1E5F7A;
+  --accent: #E84A27;
+  --accent-light: #F06847;
+  --green: #9BC53D;
   --text: #333333;
   --text-light: #666666;
   --bg: #ffffff;
@@ -134,8 +135,9 @@ a:hover {
 }
 
 .logo img {
-  height: 40px;
+  height: 50px;
   width: auto;
+  border-radius: 6px;
 }
 
 .logo-text {
