@@ -54,19 +54,72 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+    entries.forEach((entry, index) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('animate-fadeInUp');
+        // Add staggered delay
+        setTimeout(() => {
+          entry.target.classList.add('animate-fadeInUp');
+          entry.target.style.opacity = '1';
+        }, index * 100);
         observer.unobserve(entry.target);
       }
     });
   }, observerOptions);
 
   // Observe cards and sections
-  document.querySelectorAll('.card, .section-header, .contact-card').forEach(el => {
+  document.querySelectorAll('.card, .section-header, .contact-card, .service-features, .grid > *').forEach((el, i) => {
     el.style.opacity = '0';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     observer.observe(el);
   });
+
+  // Parallax effect for hero
+  const hero = document.querySelector('.hero-image');
+  if (hero) {
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      if (scrolled < 600) {
+        hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+      }
+    });
+  }
+
+  // Counter animation for stats
+  const stats = document.querySelectorAll('.stat-number');
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const target = entry.target;
+        const text = target.innerText;
+        const num = parseInt(text.replace(/\D/g, ''));
+
+        if (num && num > 0) {
+          let current = 0;
+          const increment = num / 50;
+          const suffix = text.replace(/[0-9]/g, '');
+
+          const counter = setInterval(() => {
+            current += increment;
+            if (current >= num) {
+              target.innerText = text;
+              clearInterval(counter);
+            } else {
+              target.innerText = Math.floor(current) + suffix;
+            }
+          }, 30);
+        }
+        statsObserver.unobserve(target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  stats.forEach(stat => statsObserver.observe(stat));
+
+  // Typing effect for hero title (optional)
+  const heroTitle = document.querySelector('.hero-text h1');
+  if (heroTitle) {
+    heroTitle.style.opacity = '1';
+  }
 
   // Form submission handling (for Formspree or similar)
   const contactForm = document.querySelector('form');
