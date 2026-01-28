@@ -3,17 +3,18 @@
    ======================================== */
 
 :root {
-  --primary: #2E86AB;
-  --primary-light: #4A9EC4;
-  --primary-dark: #1E5F7A;
+  --primary: #4A90D9;
+  --primary-light: #6BA8E8;
+  --primary-dark: #3A7BC8;
   --accent: #E84A27;
   --accent-light: #F06847;
-  --green: #9BC53D;
-  --text: #333333;
-  --text-light: #666666;
+  --green: #A4C639;
+  --sky: #A8D8EA;
+  --text: #2D2D2D;
+  --text-light: #555555;
   --bg: #ffffff;
-  --bg-alt: #f8f9fa;
-  --bg-dark: #1a1a1a;
+  --bg-alt: #F5FAFC;
+  --bg-dark: #2D2D2D;
   --border: #e0e0e0;
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
@@ -383,10 +384,11 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, var(--sky) 0%, var(--primary-light) 100%);
   border-radius: var(--radius);
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
+  color: var(--primary-dark);
 }
 
 .card h3 {
@@ -574,7 +576,7 @@ a:hover {
 
 .page-header {
   padding: 140px 0 60px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #3A7BC8 100%);
   color: white;
   text-align: center;
 }
@@ -628,7 +630,7 @@ a:hover {
 
 .service-image {
   height: 200px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, var(--sky) 0%, var(--primary-light) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -758,7 +760,7 @@ textarea.form-control {
 
 .cta-section {
   padding: 80px 0;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #3A7BC8 100%);
   color: white;
   text-align: center;
 }
