@@ -3,64 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>广告投放仪表盘 - MapleEdu</title>
+<title>广告监控 - MapleEdu</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background:#f5f5f5; color:#333; }
-.header { background:linear-gradient(135deg,#2d5016,#4a8c1c); color:#fff; padding:20px 24px; }
-.header h1 { font-size:20px; font-weight:600; }
-.header .meta { font-size:13px; opacity:0.8; margin-top:4px; }
-.tabs { display:flex; gap:0; background:#fff; border-bottom:2px solid #eee; padding:0 16px; position:sticky; top:0; z-index:10; }
-.tab { padding:12px 20px; cursor:pointer; font-size:14px; color:#666; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all .2s; }
-.tab:hover { color:#333; }
-.tab.active { color:#4a8c1c; border-bottom-color:#4a8c1c; font-weight:600; }
-.summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; padding:16px; background:#fff; margin:12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-.stat { text-align:center; }
-.stat .val { font-size:22px; font-weight:700; color:#222; }
-.stat .label { font-size:12px; color:#888; margin-top:2px; }
-.cards { padding:0 12px 24px; }
-.card { background:#fff; border-radius:8px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); overflow:hidden; display:flex; }
-.card .thumb { width:120px; min-height:160px; background:#f0f0f0; flex-shrink:0; position:relative; }
-.card .thumb img { width:100%; height:100%; object-fit:cover; }
-.card .thumb .no-img { display:flex; align-items:center; justify-content:center; height:100%; color:#bbb; font-size:12px; }
-.card .info { flex:1; padding:12px 16px; display:flex; flex-direction:column; gap:8px; }
-.card .title { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; }
-.card .title a { color:#4a8c1c; text-decoration:none; font-size:12px; }
-.card .title a:hover { text-decoration:underline; }
-.card .metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
-.card .metric { font-size:12px; }
-.card .metric .mv { font-weight:600; font-size:14px; }
-.card .metric .ml { color:#888; }
-.fee-bar { height:4px; background:#e8f5e9; border-radius:2px; margin-top:4px; }
-.fee-bar .fill { height:100%; background:#4a8c1c; border-radius:2px; }
-.rank { display:inline-block; width:20px; height:20px; border-radius:50%; background:#4a8c1c; color:#fff; text-align:center; line-height:20px; font-size:11px; font-weight:700; flex-shrink:0; }
-.rank.r2 { background:#6db33f; }
-.rank.r3 { background:#9ccc65; }
-.rank.rest { background:#ccc; }
-.empty { text-align:center; padding:60px 20px; color:#999; }
-.loading { text-align:center; padding:80px 20px; color:#999; }
-@media(max-width:600px) {
-  .card .thumb { width:90px; min-height:120px; }
-  .summary { grid-template-columns:repeat(3,1fr); }
-  .card .metrics { grid-template-columns:repeat(2,1fr); }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0f1117;color:#e0e0e0;font-size:14px}
+.header{background:linear-gradient(135deg,#1a2332,#2d4a22);padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;font-weight:600;color:#a5d97f}
+.header .meta{font-size:12px;color:#8a8a8a}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4caf50;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.account-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;padding:12px 16px;background:#1a1d26;border-bottom:1px solid #2a2d36}
+.account-bar .stat{text-align:center;padding:8px 4px}
+.account-bar .val{font-size:20px;font-weight:700;color:#fff}
+.account-bar .val.green{color:#4caf50}
+.account-bar .val.yellow{color:#ffc107}
+.account-bar .val.red{color:#f44336}
+.account-bar .label{font-size:11px;color:#888;margin-top:2px}
+
+.tabs{display:flex;gap:0;background:#1a1d26;border-bottom:1px solid #2a2d36;padding:0 12px;position:sticky;top:0;z-index:10}
+.tab{padding:10px 16px;cursor:pointer;font-size:13px;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.tab:hover{color:#ccc}
+.tab.active{color:#a5d97f;border-bottom-color:#a5d97f;font-weight:600}
+
+.section-title{padding:12px 16px 6px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px}
+
+.chart-container{padding:8px 16px;height:120px;position:relative}
+.chart-container canvas{width:100%!important;height:100%!important}
+
+.cards{padding:0 12px 80px}
+.card{background:#1a1d26;border-radius:8px;margin-bottom:8px;border:1px solid #2a2d36;overflow:hidden;display:flex}
+.card:hover{border-color:#3a3d46}
+.card .thumb{width:80px;min-height:107px;background:#252830;flex-shrink:0}
+.card .thumb img{width:100%;height:100%;object-fit:cover}
+.card .thumb .no-img{display:flex;align-items:center;justify-content:center;height:100%;color:#555;font-size:11px}
+.card .info{flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.card .top-row{display:flex;align-items:center;gap:6px}
+.rank{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;flex-shrink:0}
+.rank.r1{background:#ffd700;color:#000}
+.rank.r2{background:#c0c0c0;color:#000}
+.rank.r3{background:#cd7f32;color:#fff}
+.rank.rest{background:#333;color:#888}
+.card .title{font-size:12px;color:#ccc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .title a{color:#a5d97f;text-decoration:none;font-size:11px;margin-left:4px}
+.fee-bar{height:3px;background:#252830;border-radius:2px}
+.fee-bar .fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#4caf50,#a5d97f)}
+.card .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.card .metric{font-size:11px}
+.card .metric .mv{font-weight:600;font-size:13px;color:#fff}
+.card .metric .ml{color:#666;font-size:10px}
+.card .metric.warn .mv{color:#f44336}
+.card .metric.good .mv{color:#4caf50}
+
+.empty{text-align:center;padding:40px 20px;color:#555}
+.loading{text-align:center;padding:60px 20px;color:#555}
+
+@media(max-width:600px){
+  .card .thumb{width:64px;min-height:85px}
+  .account-bar{grid-template-columns:repeat(3,1fr)}
+  .card .metrics{grid-template-columns:repeat(3,1fr)}
 }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>📊 广告投放仪表盘</h1>
-  <div class="meta" id="updateTime">加载中...</div>
+  <h1>📊 MapleEdu 广告监控</h1>
+  <div class="meta"><span class="live-dot"></span><span id="updateTime">加载中...</span></div>
 </div>
 
+<div class="account-bar" id="accountBar"></div>
+
 <div class="tabs" id="tabs">
-  <div class="tab active" data-range="today">今日</div>
+  <div class="tab active" data-range="today">今日实时</div>
   <div class="tab" data-range="week">近7天</div>
   <div class="tab" data-range="month">近30天</div>
   <div class="tab" data-range="all">全部</div>
 </div>
 
-<div id="summaryBox" class="summary"></div>
+<div class="section-title">每日趋势</div>
+<div class="chart-container"><canvas id="trendChart"></canvas></div>
+
+<div class="section-title">笔记排行（按消费）</div>
 <div id="cardsBox" class="cards"><div class="loading">加载数据中...</div></div>
 
 <script>
@@ -71,36 +95,90 @@ async function loadData() {
   try {
     const resp = await fetch('data.json?' + Date.now());
     DATA = await resp.json();
+    const t = new Date(DATA.updated_at);
     document.getElementById('updateTime').textContent =
-      `${DATA.advertiser.name} · 更新于 ${new Date(DATA.updated_at).toLocaleString('zh-CN')}`;
-    render();
+      `${t.toLocaleString('zh-CN')} 自动刷新`;
+    renderAccount();
+    renderTrend();
+    renderCards();
   } catch (e) {
-    document.getElementById('cardsBox').innerHTML = '<div class="empty">数据加载失败，请稍后刷新</div>';
+    document.getElementById('cardsBox').innerHTML = '<div class="empty">数据加载失败</div>';
   }
 }
 
-function render() {
-  if (!DATA) return;
+function renderAccount() {
+  const a = DATA.account || {};
+  const balance = a.balance || 0;
+  const balClass = balance > 500000 ? 'green' : balance > 100000 ? 'yellow' : 'red';
+  const spend = a.today_spend || 0;
+  const budget = a.daily_budget || 1;
+  const pace = Math.round(spend / budget * 100);
+
+  document.getElementById('accountBar').innerHTML = `
+    <div class="stat"><div class="val ${balClass}">¥${(balance/100).toLocaleString()}</div><div class="label">账户余额</div></div>
+    <div class="stat"><div class="val">¥${spend.toFixed(0)}</div><div class="label">今日消费</div></div>
+    <div class="stat"><div class="val">${a.today_impression?.toLocaleString()||0}</div><div class="label">展现</div></div>
+    <div class="stat"><div class="val">${a.today_click||0}</div><div class="label">点击</div></div>
+    <div class="stat"><div class="val">${a.today_ctr||'0%'}</div><div class="label">CTR</div></div>
+    <div class="stat"><div class="val">${a.today_message||0}</div><div class="label">私信</div></div>
+    <div class="stat"><div class="val">${a.today_leads||0}</div><div class="label">留资</div></div>
+    <div class="stat"><div class="val">${pace}%</div><div class="label">日预算进度</div></div>
+  `;
+}
+
+function renderTrend() {
+  const canvas = document.getElementById('trendChart');
+  const ctx = canvas.getContext('2d');
+  const trend = DATA.daily_trend || [];
+  if (trend.length < 2) { ctx.fillStyle='#555'; ctx.fillText('数据不足',100,60); return; }
+
+  const W = canvas.parentElement.clientWidth - 32;
+  const H = 110;
+  canvas.width = W * 2; canvas.height = H * 2;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.scale(2, 2);
+
+  const fees = trend.map(d => d.fee);
+  const maxFee = Math.max(...fees, 1);
+  const msgs = trend.map(d => d.message_consult);
+  const maxMsg = Math.max(...msgs, 1);
+
+  const pad = {l:40, r:10, t:10, b:20};
+  const cw = W - pad.l - pad.r;
+  const ch = H - pad.t - pad.b;
+
+  // Fee line (green)
+  ctx.strokeStyle = '#4caf50'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  trend.forEach((d, i) => {
+    const x = pad.l + (i / (trend.length - 1)) * cw;
+    const y = pad.t + ch - (d.fee / maxFee) * ch;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Message bars (yellow)
+  const bw = Math.max(cw / trend.length * 0.4, 2);
+  ctx.fillStyle = 'rgba(255,193,7,0.4)';
+  trend.forEach((d, i) => {
+    const x = pad.l + (i / (trend.length - 1)) * cw - bw/2;
+    const h = (d.message_consult / maxMsg) * ch;
+    ctx.fillRect(x, pad.t + ch - h, bw, h);
+  });
+
+  // Labels
+  ctx.fillStyle = '#666'; ctx.font = '10px sans-serif';
+  ctx.fillText(trend[0].date.slice(5), pad.l, H - 4);
+  ctx.fillText(trend[trend.length-1].date.slice(5), W - pad.r - 30, H - 4);
+  ctx.fillStyle = '#4caf50'; ctx.fillText('¥' + maxFee.toFixed(0), 2, pad.t + 10);
+  ctx.fillStyle = '#ffc107'; ctx.fillText(maxMsg + '私信', 2, pad.t + 22);
+}
+
+function renderCards() {
   const range = DATA.ranges[currentRange];
   if (!range) return;
-
   const notes = range.notes || [];
-  const totalFee = notes.reduce((s, n) => s + n.fee, 0);
-  const totalImp = notes.reduce((s, n) => s + n.impression, 0);
-  const totalClick = notes.reduce((s, n) => s + n.click, 0);
-  const totalMsg = notes.reduce((s, n) => s + n.message_consult, 0);
-  const totalLeads = notes.reduce((s, n) => s + n.msg_leads_num, 0);
-
-  document.getElementById('summaryBox').innerHTML = `
-    <div class="stat"><div class="val">¥${totalFee.toFixed(0)}</div><div class="label">总消费</div></div>
-    <div class="stat"><div class="val">${totalImp.toLocaleString()}</div><div class="label">展现</div></div>
-    <div class="stat"><div class="val">${totalClick}</div><div class="label">点击</div></div>
-    <div class="stat"><div class="val">${totalImp > 0 ? (totalClick/totalImp*100).toFixed(1) : 0}%</div><div class="label">CTR</div></div>
-    <div class="stat"><div class="val">${totalMsg}</div><div class="label">私信</div></div>
-    <div class="stat"><div class="val">${totalLeads}</div><div class="label">留资</div></div>
-  `;
-
-  if (notes.length === 0) {
+  if (!notes.length) {
     document.getElementById('cardsBox').innerHTML = '<div class="empty">该时段暂无数据</div>';
     return;
   }
@@ -109,49 +187,50 @@ function render() {
 
   document.getElementById('cardsBox').innerHTML = notes.map((n, i) => {
     const thumb = DATA.thumbnails[n.note_id];
-    const rankClass = i === 0 ? '' : i === 1 ? 'r2' : i === 2 ? 'r3' : 'rest';
     const xhsLink = `https://www.xiaohongshu.com/explore/${n.note_id}`;
     const pct = (n.fee / maxFee * 100).toFixed(0);
+    const rankClass = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : 'rest';
+
+    const cplClass = n.cpl > 0 ? (n.cpl < 400 ? 'good' : n.cpl > 800 ? 'warn' : '') : '';
+    const cplText = n.cpl > 0 ? '¥' + n.cpl : '-';
 
     return `<div class="card">
       <div class="thumb">
         ${thumb
-          ? `<a href="${xhsLink}" target="_blank"><img src="${thumb}" alt="" loading="lazy"></a>`
-          : `<a href="${xhsLink}" target="_blank"><div class="no-img">暂无图</div></a>`
-        }
+          ? `<a href="${xhsLink}" target="_blank" rel="noopener"><img src="${thumb}" alt="" loading="lazy"></a>`
+          : `<a href="${xhsLink}" target="_blank" rel="noopener"><div class="no-img">无图</div></a>`}
       </div>
       <div class="info">
-        <div class="title">
+        <div class="top-row">
           <span class="rank ${rankClass}">${i+1}</span>
-          <span>${n.name || n.note_id.slice(-8)}</span>
-          <a href="${xhsLink}" target="_blank">查看原帖 →</a>
+          <span class="title">${n.name || n.note_id.slice(-8)}<a href="${xhsLink}" target="_blank" rel="noopener">↗</a></span>
         </div>
         <div class="fee-bar"><div class="fill" style="width:${pct}%"></div></div>
         <div class="metrics">
-          <div class="metric"><div class="mv">¥${n.fee.toFixed(1)}</div><div class="ml">消费</div></div>
+          <div class="metric"><div class="mv">¥${n.fee.toFixed(0)}</div><div class="ml">消费</div></div>
           <div class="metric"><div class="mv">${n.impression.toLocaleString()}</div><div class="ml">展现</div></div>
           <div class="metric"><div class="mv">${n.click}</div><div class="ml">点击</div></div>
           <div class="metric"><div class="mv">${n.ctr}</div><div class="ml">CTR</div></div>
-          <div class="metric"><div class="mv">¥${n.cpc}</div><div class="ml">CPC</div></div>
           <div class="metric"><div class="mv">${n.message_consult}</div><div class="ml">私信</div></div>
+          <div class="metric"><div class="mv">${n.msg_leads_num}</div><div class="ml">留资</div></div>
+          <div class="metric ${cplClass}"><div class="mv">${cplText}</div><div class="ml">留资成本</div></div>
+          <div class="metric"><div class="mv">¥${n.cpc||0}</div><div class="ml">CPC</div></div>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-// Tab switching
 document.getElementById('tabs').addEventListener('click', e => {
   const tab = e.target.closest('.tab');
   if (!tab) return;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   tab.classList.add('active');
   currentRange = tab.dataset.range;
-  render();
+  renderCards();
 });
 
 loadData();
-// Auto-refresh every 5 min
 setInterval(loadData, 300000);
 </script>
 </body>
