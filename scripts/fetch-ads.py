@@ -114,37 +114,47 @@ def fetch_realtime_creative() -> list[dict]:
     return results
 
 
-def capture_thumbnail(note_id: str) -> bool:
-    """Screenshot a XHS note page using Playwright."""
-    thumb_path = THUMBS_DIR / f"{note_id}.png"
+def fetch_note_covers() -> dict[str, str]:
+    """Fetch cover image URLs from note.list API."""
+    import urllib.request
+
+    covers: dict[str, str] = {}
+    for note_type in [1, 2]:  # 1=图文, 2=视频
+        result = worker_call("note.list", {
+            "note_type": note_type,
+            "page_index": 1,
+            "page_size": 100,
+        })
+        notes = (result.get("data") or {}).get("notes", [])
+        for n in notes:
+            nid = n.get("note_id", "")
+            images = n.get("image_list", [])
+            if nid and images:
+                covers[nid] = images[0]
+    return covers
+
+
+def download_cover(note_id: str, image_url: str) -> bool:
+    """Download cover image as thumbnail."""
+    import urllib.request
+
+    thumb_path = THUMBS_DIR / f"{note_id}.jpg"
     if thumb_path.exists():
         age_hours = (datetime.now().timestamp() - thumb_path.stat().st_mtime) / 3600
         if age_hours < 24:
-            return True  # fresh enough
+            return True
 
-    url = f"https://www.xiaohongshu.com/explore/{note_id}"
-    script = f"""
-import asyncio
-from playwright.async_api import async_playwright
-async def main():
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page(viewport={{"width": 480, "height": 640}})
-        try:
-            await page.goto("{url}", wait_until="domcontentloaded", timeout=15000)
-            await page.wait_for_timeout(3000)
-            await page.screenshot(path="{thumb_path}", full_page=False)
-        except Exception as e:
-            print(f"Screenshot failed for {note_id}: {{e}}")
-        finally:
-            await browser.close()
-asyncio.run(main())
-"""
-    result = subprocess.run(
-        [sys.executable, "-c", script],
-        capture_output=True, text=True, timeout=30,
-    )
-    return thumb_path.exists()
+    try:
+        req = urllib.request.Request(image_url, headers={
+            "User-Agent": "Mozilla/5.0",
+            "Referer": "https://www.xiaohongshu.com/",
+        })
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            thumb_path.write_bytes(resp.read())
+        return True
+    except Exception as e:
+        print(f"Download failed for {note_id}: {e}", file=sys.stderr)
+        return False
 
 
 def build_dashboard_data() -> dict:
@@ -168,6 +178,9 @@ def build_dashboard_data() -> dict:
 
     print("Fetching all-time note report...")
     all_data = fetch_note_report(year_ago, yesterday)
+
+    print("Fetching note covers...")
+    covers = fetch_note_covers()
 
     # Collect all unique note IDs
     all_note_ids = set()
@@ -213,11 +226,14 @@ def build_dashboard_data() -> dict:
             s["fee"] = round(s["fee"], 2)
         return by_note
 
-    # Capture thumbnails
-    print(f"Capturing thumbnails for {len(all_note_ids)} notes...")
+    # Download cover images
+    print(f"Downloading covers for {len(all_note_ids)} notes ({len(covers)} have images)...")
     has_thumb = {}
     for nid in all_note_ids:
-        has_thumb[nid] = capture_thumbnail(nid)
+        if nid in covers:
+            has_thumb[nid] = download_cover(nid, covers[nid])
+        else:
+            has_thumb[nid] = False
 
     return {
         "updated_at": now.isoformat(),
@@ -248,7 +264,7 @@ def build_dashboard_data() -> dict:
                 "notes": list(summarize(all_data).values()),
             },
         },
-        "thumbnails": {nid: f"thumbs/{nid}.png" for nid, ok in has_thumb.items() if ok},
+        "thumbnails": {nid: f"thumbs/{nid}.jpg" for nid, ok in has_thumb.items() if ok},
     }
 
 
