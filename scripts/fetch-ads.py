@@ -115,23 +115,44 @@ def fetch_realtime_creative() -> list[dict]:
 
 
 def fetch_note_covers() -> dict[str, str]:
-    """Fetch cover image URLs from note.list API."""
+    """Fetch cover image URLs from note.list API for ALL note types."""
+    covers: dict[str, str] = {}
+    for note_type in [1, 2]:
+        for page in range(1, 10):
+            result = worker_call("note.list", {
+                "note_type": note_type,
+                "page_index": page,
+                "page_size": 100,
+            })
+            notes = (result.get("data") or {}).get("notes", [])
+            if not notes:
+                break
+            for n in notes:
+                nid = n.get("note_id", "")
+                images = n.get("image_list", [])
+                if nid and images:
+                    covers[nid] = images[0]
+    return covers
+
+
+def fetch_note_cover_from_page(note_id: str) -> str | None:
+    """Scrape og:image from XHS note page as fallback."""
     import urllib.request
 
-    covers: dict[str, str] = {}
-    for note_type in [1, 2]:  # 1=图文, 2=视频
-        result = worker_call("note.list", {
-            "note_type": note_type,
-            "page_index": 1,
-            "page_size": 100,
+    url = f"https://www.xiaohongshu.com/explore/{note_id}"
+    try:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         })
-        notes = (result.get("data") or {}).get("notes", [])
-        for n in notes:
-            nid = n.get("note_id", "")
-            images = n.get("image_list", [])
-            if nid and images:
-                covers[nid] = images[0]
-    return covers
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            html = resp.read().decode("utf-8", errors="replace")
+        import re
+        match = re.search(r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"', html)
+        if match:
+            return match.group(1)
+    except Exception:
+        pass
+    return None
 
 
 def download_cover(note_id: str, image_url: str) -> bool:
@@ -226,14 +247,19 @@ def build_dashboard_data() -> dict:
             s["fee"] = round(s["fee"], 2)
         return by_note
 
-    # Download cover images
-    print(f"Downloading covers for {len(all_note_ids)} notes ({len(covers)} have images)...")
+    # Download cover images — API first, og:image fallback
+    print(f"Downloading covers for {len(all_note_ids)} notes ({len(covers)} from API)...")
     has_thumb = {}
     for nid in all_note_ids:
         if nid in covers:
             has_thumb[nid] = download_cover(nid, covers[nid])
         else:
-            has_thumb[nid] = False
+            # Fallback: scrape og:image
+            og_url = fetch_note_cover_from_page(nid)
+            if og_url:
+                has_thumb[nid] = download_cover(nid, og_url)
+            else:
+                has_thumb[nid] = False
 
     return {
         "updated_at": now.isoformat(),
