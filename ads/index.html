@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>广告投放仪表盘 - MapleEdu</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background:#f5f5f5; color:#333; }
+.header { background:linear-gradient(135deg,#2d5016,#4a8c1c); color:#fff; padding:20px 24px; }
+.header h1 { font-size:20px; font-weight:600; }
+.header .meta { font-size:13px; opacity:0.8; margin-top:4px; }
+.tabs { display:flex; gap:0; background:#fff; border-bottom:2px solid #eee; padding:0 16px; position:sticky; top:0; z-index:10; }
+.tab { padding:12px 20px; cursor:pointer; font-size:14px; color:#666; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all .2s; }
+.tab:hover { color:#333; }
+.tab.active { color:#4a8c1c; border-bottom-color:#4a8c1c; font-weight:600; }
+.summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; padding:16px; background:#fff; margin:12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.stat { text-align:center; }
+.stat .val { font-size:22px; font-weight:700; color:#222; }
+.stat .label { font-size:12px; color:#888; margin-top:2px; }
+.cards { padding:0 12px 24px; }
+.card { background:#fff; border-radius:8px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); overflow:hidden; display:flex; }
+.card .thumb { width:120px; min-height:160px; background:#f0f0f0; flex-shrink:0; position:relative; }
+.card .thumb img { width:100%; height:100%; object-fit:cover; }
+.card .thumb .no-img { display:flex; align-items:center; justify-content:center; height:100%; color:#bbb; font-size:12px; }
+.card .info { flex:1; padding:12px 16px; display:flex; flex-direction:column; gap:8px; }
+.card .title { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; }
+.card .title a { color:#4a8c1c; text-decoration:none; font-size:12px; }
+.card .title a:hover { text-decoration:underline; }
+.card .metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.card .metric { font-size:12px; }
+.card .metric .mv { font-weight:600; font-size:14px; }
+.card .metric .ml { color:#888; }
+.fee-bar { height:4px; background:#e8f5e9; border-radius:2px; margin-top:4px; }
+.fee-bar .fill { height:100%; background:#4a8c1c; border-radius:2px; }
+.rank { display:inline-block; width:20px; height:20px; border-radius:50%; background:#4a8c1c; color:#fff; text-align:center; line-height:20px; font-size:11px; font-weight:700; flex-shrink:0; }
+.rank.r2 { background:#6db33f; }
+.rank.r3 { background:#9ccc65; }
+.rank.rest { background:#ccc; }
+.empty { text-align:center; padding:60px 20px; color:#999; }
+.loading { text-align:center; padding:80px 20px; color:#999; }
+@media(max-width:600px) {
+  .card .thumb { width:90px; min-height:120px; }
+  .summary { grid-template-columns:repeat(3,1fr); }
+  .card .metrics { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 广告投放仪表盘</h1>
+  <div class="meta" id="updateTime">加载中...</div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-range="today">今日</div>
+  <div class="tab" data-range="week">近7天</div>
+  <div class="tab" data-range="month">近30天</div>
+  <div class="tab" data-range="all">全部</div>
+</div>
+
+<div id="summaryBox" class="summary"></div>
+<div id="cardsBox" class="cards"><div class="loading">加载数据中...</div></div>
+
+<script>
+let DATA = null;
+let currentRange = 'today';
+
+async function loadData() {
+  try {
+    const resp = await fetch('data.json?' + Date.now());
+    DATA = await resp.json();
+    document.getElementById('updateTime').textContent =
+      `${DATA.advertiser.name} · 更新于 ${new Date(DATA.updated_at).toLocaleString('zh-CN')}`;
+    render();
+  } catch (e) {
+    document.getElementById('cardsBox').innerHTML = '<div class="empty">数据加载失败，请稍后刷新</div>';
+  }
+}
+
+function render() {
+  if (!DATA) return;
+  const range = DATA.ranges[currentRange];
+  if (!range) return;
+
+  const notes = range.notes || [];
+  const totalFee = notes.reduce((s, n) => s + n.fee, 0);
+  const totalImp = notes.reduce((s, n) => s + n.impression, 0);
+  const totalClick = notes.reduce((s, n) => s + n.click, 0);
+  const totalMsg = notes.reduce((s, n) => s + n.message_consult, 0);
+  const totalLeads = notes.reduce((s, n) => s + n.msg_leads_num, 0);
+
+  document.getElementById('summaryBox').innerHTML = `
+    <div class="stat"><div class="val">¥${totalFee.toFixed(0)}</div><div class="label">总消费</div></div>
+    <div class="stat"><div class="val">${totalImp.toLocaleString()}</div><div class="label">展现</div></div>
+    <div class="stat"><div class="val">${totalClick}</div><div class="label">点击</div></div>
+    <div class="stat"><div class="val">${totalImp > 0 ? (totalClick/totalImp*100).toFixed(1) : 0}%</div><div class="label">CTR</div></div>
+    <div class="stat"><div class="val">${totalMsg}</div><div class="label">私信</div></div>
+    <div class="stat"><div class="val">${totalLeads}</div><div class="label">留资</div></div>
+  `;
+
+  if (notes.length === 0) {
+    document.getElementById('cardsBox').innerHTML = '<div class="empty">该时段暂无数据</div>';
+    return;
+  }
+
+  const maxFee = Math.max(...notes.map(n => n.fee), 1);
+
+  document.getElementById('cardsBox').innerHTML = notes.map((n, i) => {
+    const thumb = DATA.thumbnails[n.note_id];
+    const rankClass = i === 0 ? '' : i === 1 ? 'r2' : i === 2 ? 'r3' : 'rest';
+    const xhsLink = `https://www.xiaohongshu.com/explore/${n.note_id}`;
+    const pct = (n.fee / maxFee * 100).toFixed(0);
+
+    return `<div class="card">
+      <div class="thumb">
+        ${thumb
+          ? `<a href="${xhsLink}" target="_blank"><img src="${thumb}" alt="" loading="lazy"></a>`
+          : `<a href="${xhsLink}" target="_blank"><div class="no-img">暂无图</div></a>`
+        }
+      </div>
+      <div class="info">
+        <div class="title">
+          <span class="rank ${rankClass}">${i+1}</span>
+          <span>${n.name || n.note_id.slice(-8)}</span>
+          <a href="${xhsLink}" target="_blank">查看原帖 →</a>
+        </div>
+        <div class="fee-bar"><div class="fill" style="width:${pct}%"></div></div>
+        <div class="metrics">
+          <div class="metric"><div class="mv">¥${n.fee.toFixed(1)}</div><div class="ml">消费</div></div>
+          <div class="metric"><div class="mv">${n.impression.toLocaleString()}</div><div class="ml">展现</div></div>
+          <div class="metric"><div class="mv">${n.click}</div><div class="ml">点击</div></div>
+          <div class="metric"><div class="mv">${n.ctr}</div><div class="ml">CTR</div></div>
+          <div class="metric"><div class="mv">¥${n.cpc}</div><div class="ml">CPC</div></div>
+          <div class="metric"><div class="mv">${n.message_consult}</div><div class="ml">私信</div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Tab switching
+document.getElementById('tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  currentRange = tab.dataset.range;
+  render();
+});
+
+loadData();
+// Auto-refresh every 5 min
+setInterval(loadData, 300000);
+</script>
+</body>
+</html>
