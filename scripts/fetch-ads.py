@@ -91,14 +91,14 @@ def fetch_realtime_creative() -> list[dict]:
         "page_size": 100,
     })
 
-    if not result.get("ok"):
-        # Realtime returns data at top level, not inside "data"
-        creativity_dtos = result.get("data", {}).get("creativity_dtos", [])
-        if not creativity_dtos:
-            print(f"Realtime API: {result.get('msg', 'no data')}", file=sys.stderr)
-            return []
-    else:
+    # Worker now returns top-level fields: creativity_dtos, page, total_data
+    creativity_dtos = result.get("creativity_dtos", [])
+    if not creativity_dtos:
+        # Fallback: check inside data
         creativity_dtos = (result.get("data") or {}).get("creativity_dtos", [])
+    if not creativity_dtos:
+        print(f"Realtime API: {result.get('msg', 'no creativity data')}", file=sys.stderr)
+        return []
 
     results = []
     for c in creativity_dtos:
