@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-03-15T23:00:01.852484",
+  "updated_at": "2026-03-16T01:00:01.721243",
   "advertiser": {
     "id": 7463472,
     "name": "UF-SG枫叶留学"
   },
   "account": {
-    "balance": 1792790,
+    "balance": 1780727,
     "daily_budget": 0,
     "today_spend": 0.0,
     "today_impression": 0,
@@ -18,175 +18,7 @@
   "ai_commentary": "今日消费¥0.00，整体私信转留资率24.7%，消费环比+1.3%。(AI评语生成失败，显示基础数据摘要)",
   "hourly_trend": [
     {
-      "hour": "07:56",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "08:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "08:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "08:16",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "08:21",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "08:35",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "08:39",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "09:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "10:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "11:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "12:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "13:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "14:02",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "15:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "16:02",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "17:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "18:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "19:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "20:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "21:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "22:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "23:00",
+      "hour": "01:00",
       "fee": 0.0,
       "impression": 0,
       "click": 0,
@@ -241,39 +73,39 @@
   "ranges": {
     "today": {
       "label": "今日",
-      "start": "2026-03-15",
-      "end": "2026-03-15",
+      "start": "2026-03-16",
+      "end": "2026-03-16",
       "notes": [
         {
           "note_id": "668e1f6400000000250048a3",
           "name": "20250628-11篇-SEC_0628_10:40_9",
-          "impression": 2423,
-          "click": 80,
-          "fee": 446.79,
-          "message_consult": 3,
-          "initiative_message": 3,
+          "impression": 357,
+          "click": 11,
+          "fee": 94.44,
+          "message_consult": 1,
+          "initiative_message": 1,
           "msg_leads_num": 0,
-          "interaction": 3,
-          "like": 1,
-          "collect": 1,
+          "interaction": 2,
+          "like": 0,
+          "collect": 0,
           "comment": 0,
           "share": 0,
-          "follow": 1,
-          "ctr": "3.30%",
-          "cpc": 5.58,
+          "follow": 2,
+          "ctr": "3.08%",
+          "cpc": 8.59,
           "cpl": 0,
-          "msg_cost": 149.0,
-          "fee_pct": 83.6,
+          "msg_cost": 94.0,
+          "fee_pct": 78.3,
           "msg_to_lead_rate": "0.0%",
           "fee_change_7d": "-2.4%",
-          "efficiency_score": 45.3
+          "efficiency_score": 31.3
         },
         {
           "note_id": "668a94fd000000001f00533e",
           "name": "20250628-11篇-SEC_0628_10:40_10",
-          "impression": 308,
-          "click": 13,
-          "fee": 48.05,
+          "impression": 49,
+          "click": 4,
+          "fee": 24.55,
           "message_consult": 0,
           "initiative_message": 0,
           "msg_leads_num": 0,
@@ -283,45 +115,21 @@
           "comment": 0,
           "share": 0,
           "follow": 0,
-          "ctr": "4.22%",
-          "cpc": 3.7,
+          "ctr": "8.16%",
+          "cpc": 6.14,
           "cpl": 0,
           "msg_cost": 0,
-          "fee_pct": 9.0,
+          "fee_pct": 20.4,
           "msg_to_lead_rate": "N/A",
           "fee_change_7d": "-2.4%",
-          "efficiency_score": 54.7
-        },
-        {
-          "note_id": "667cba67000000001e013df2",
-          "name": "20250628-11篇-SEC_0628_10:40_11",
-          "impression": 124,
-          "click": 2,
-          "fee": 20.18,
-          "message_consult": 0,
-          "initiative_message": 0,
-          "msg_leads_num": 0,
-          "interaction": 0,
-          "like": 0,
-          "collect": 0,
-          "comment": 0,
-          "share": 0,
-          "follow": 0,
-          "ctr": "1.61%",
-          "cpc": 10.09,
-          "cpl": 0,
-          "msg_cost": 0,
-          "fee_pct": 3.8,
-          "msg_to_lead_rate": "N/A",
-          "fee_change_7d": "-2.4%",
-          "efficiency_score": 36.0
+          "efficiency_score": 35.8
         },
         {
           "note_id": "67f765a900000000090380e0",
           "name": "QS前200名校，学制短+中留服认证！",
-          "impression": 18,
-          "click": 4,
-          "fee": 19.52,
+          "impression": 2,
+          "click": 1,
+          "fee": 1.64,
           "message_consult": 0,
           "initiative_message": 0,
           "msg_leads_num": 0,
@@ -331,19 +139,19 @@
           "comment": 0,
           "share": 0,
           "follow": 0,
-          "ctr": "22.22%",
-          "cpc": 4.88,
+          "ctr": "50.00%",
+          "cpc": 1.64,
           "cpl": 0,
           "msg_cost": 0,
-          "fee_pct": 3.7,
+          "fee_pct": 1.4,
           "msg_to_lead_rate": "N/A",
           "fee_change_7d": "-2.4%",
-          "efficiency_score": 69.0
+          "efficiency_score": 75.0
         },
         {
           "note_id": "685bcfc0000000001202c37b",
           "name": "初中毕业，也能读本科！？",
-          "impression": 29,
+          "impression": 6,
           "click": 0,
           "fee": 0.0,
           "message_consult": 0,
@@ -365,9 +173,9 @@
           "efficiency_score": 25.0
         },
         {
-          "note_id": "67f61448000000001200ea8e",
-          "name": "📌2年制本科，QS前200名校直通车！",
-          "impression": 1,
+          "note_id": "667cba67000000001e013df2",
+          "name": "20250628-11篇-SEC_0628_10:40_11",
+          "impression": 12,
           "click": 0,
           "fee": 0.0,
           "message_consult": 0,
@@ -391,7 +199,7 @@
         {
           "note_id": "67dccca7000000001d014c1b",
           "name": "新加坡一年制硕士",
-          "impression": 10,
+          "impression": 1,
           "click": 0,
           "fee": 0.0,
           "message_consult": 0,
@@ -416,8 +224,8 @@
     },
     "week": {
       "label": "近7天",
-      "start": "2026-03-08",
-      "end": "2026-03-15",
+      "start": "2026-03-09",
+      "end": "2026-03-16",
       "notes": [
         {
           "note_id": "668e1f6400000000250048a3",
@@ -615,8 +423,8 @@
     },
     "month": {
       "label": "近30天",
-      "start": "2026-02-13",
-      "end": "2026-03-15",
+      "start": "2026-02-14",
+      "end": "2026-03-16",
       "notes": [
         {
           "note_id": "668e1f6400000000250048a3",
@@ -814,8 +622,8 @@
     },
     "all": {
       "label": "全部",
-      "start": "2025-03-15",
-      "end": "2026-03-15",
+      "start": "2025-03-16",
+      "end": "2026-03-16",
       "notes": [
         {
           "note_id": "668e1f6400000000250048a3",
@@ -1541,36 +1349,36 @@
     }
   },
   "thumbnails": {
-    "6720e64b000000003c0149df": "thumbs/6720e64b000000003c0149df.jpg",
-    "6683d72a000000001e01383b": "thumbs/6683d72a000000001e01383b.jpg",
+    "67edf66f000000000b02fd55": "thumbs/67edf66f000000000b02fd55.jpg",
+    "66cc1646000000001f0185b0": "thumbs/66cc1646000000001f0185b0.jpg",
+    "685e1a6e00000000120335c0": "thumbs/685e1a6e00000000120335c0.jpg",
     "6685364b000000001e011fd1": "thumbs/6685364b000000001e011fd1.jpg",
     "67dbcd77000000000900d538": "thumbs/67dbcd77000000000900d538.jpg",
-    "685e1a6e00000000120335c0": "thumbs/685e1a6e00000000120335c0.jpg",
-    "66c64481000000001f01643f": "thumbs/66c64481000000001f01643f.jpg",
-    "685bcfc0000000001202c37b": "thumbs/685bcfc0000000001202c37b.jpg",
-    "67f4d1790000000009039f8f": "thumbs/67f4d1790000000009039f8f.jpg",
-    "66c8b412000000001f03c11e": "thumbs/66c8b412000000001f03c11e.jpg",
-    "67f61448000000001200ea8e": "thumbs/67f61448000000001200ea8e.jpg",
-    "66cc1646000000001f0185b0": "thumbs/66cc1646000000001f0185b0.jpg",
-    "66c4c025000000001f019cbc": "thumbs/66c4c025000000001f019cbc.jpg",
-    "686f5d820000000012021270": "thumbs/686f5d820000000012021270.jpg",
-    "67f765a900000000090380e0": "thumbs/67f765a900000000090380e0.jpg",
-    "67f5ce1a000000000f038872": "thumbs/67f5ce1a000000000f038872.jpg",
+    "67f72583000000000b0167b9": "thumbs/67f72583000000000b0167b9.jpg",
     "6891a3d5000000000403d173": "thumbs/6891a3d5000000000403d173.jpg",
     "667cba67000000001e013df2": "thumbs/667cba67000000001e013df2.jpg",
-    "68919ed300000000050052c2": "thumbs/68919ed300000000050052c2.jpg",
-    "67dccca7000000001d014c1b": "thumbs/67dccca7000000001d014c1b.jpg",
-    "67f72583000000000b0167b9": "thumbs/67f72583000000000b0167b9.jpg",
-    "68725e0c0000000017037fa1": "thumbs/68725e0c0000000017037fa1.jpg",
-    "67edf66f000000000b02fd55": "thumbs/67edf66f000000000b02fd55.jpg",
+    "6894675900000000020019be": "thumbs/6894675900000000020019be.jpg",
+    "66c4c025000000001f019cbc": "thumbs/66c4c025000000001f019cbc.jpg",
     "66bdd1ca000000000503bbd7": "thumbs/66bdd1ca000000000503bbd7.jpg",
-    "668a94fd000000001f00533e": "thumbs/668a94fd000000001f00533e.jpg",
-    "682c23fe000000000303cd16": "thumbs/682c23fe000000000303cd16.jpg",
+    "66c64481000000001f01643f": "thumbs/66c64481000000001f01643f.jpg",
+    "67f61448000000001200ea8e": "thumbs/67f61448000000001200ea8e.jpg",
+    "68725e0c0000000017037fa1": "thumbs/68725e0c0000000017037fa1.jpg",
+    "67f5ce1a000000000f038872": "thumbs/67f5ce1a000000000f038872.jpg",
     "668e1f6400000000250048a3": "thumbs/668e1f6400000000250048a3.jpg",
-    "66063f5f0000000014006e65": "thumbs/66063f5f0000000014006e65.jpg",
-    "685ead0200000000150226de": "thumbs/685ead0200000000150226de.jpg",
+    "67f765a900000000090380e0": "thumbs/67f765a900000000090380e0.jpg",
+    "668a94fd000000001f00533e": "thumbs/668a94fd000000001f00533e.jpg",
+    "686f5d820000000012021270": "thumbs/686f5d820000000012021270.jpg",
+    "66c8b412000000001f03c11e": "thumbs/66c8b412000000001f03c11e.jpg",
     "689581470000000004007dcf": "thumbs/689581470000000004007dcf.jpg",
-    "6894675900000000020019be": "thumbs/6894675900000000020019be.jpg"
+    "68919ed300000000050052c2": "thumbs/68919ed300000000050052c2.jpg",
+    "685ead0200000000150226de": "thumbs/685ead0200000000150226de.jpg",
+    "6720e64b000000003c0149df": "thumbs/6720e64b000000003c0149df.jpg",
+    "67dccca7000000001d014c1b": "thumbs/67dccca7000000001d014c1b.jpg",
+    "67f4d1790000000009039f8f": "thumbs/67f4d1790000000009039f8f.jpg",
+    "685bcfc0000000001202c37b": "thumbs/685bcfc0000000001202c37b.jpg",
+    "682c23fe000000000303cd16": "thumbs/682c23fe000000000303cd16.jpg",
+    "66063f5f0000000014006e65": "thumbs/66063f5f0000000014006e65.jpg",
+    "6683d72a000000001e01383b": "thumbs/6683d72a000000001e01383b.jpg"
   },
   "note_titles": {
     "689581470000000004007dcf": "香港留学倒计时！2026fall申请时间线",
