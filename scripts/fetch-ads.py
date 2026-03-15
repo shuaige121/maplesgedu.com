@@ -189,6 +189,27 @@ def fetch_note_covers() -> dict[str, str]:
     return covers
 
 
+def fetch_note_titles() -> dict[str, str]:
+    """Fetch real note titles from note.list API."""
+    titles: dict[str, str] = {}
+    for note_type in [1, 2]:  # 1=图文 2=视频
+        for page in range(1, 10):
+            result = worker_call("note.list", {
+                "note_type": note_type,
+                "page_index": page,
+                "page_size": 100,
+            })
+            notes = (result.get("data") or {}).get("notes", [])
+            if not notes:
+                break
+            for n in notes:
+                nid = n.get("note_id", "")
+                title = n.get("title", "")
+                if nid and title:
+                    titles[nid] = title
+    return titles
+
+
 def download_cover(note_id: str, image_url: str) -> bool:
     import urllib.request
 
@@ -210,16 +231,19 @@ def download_cover(note_id: str, image_url: str) -> bool:
         return False
 
 
-def summarize_notes(rows: list[dict]) -> list[dict]:
+def summarize_notes(rows: list[dict], titles: dict[str, str] | None = None) -> list[dict]:
+    titles = titles or {}
     by_note: dict[str, dict] = {}
     for r in rows:
         nid = r.get("note_id", "")
         if not nid:
             continue
         if nid not in by_note:
+            # 优先用真实标题，fallback 到 creativity_name
+            name = titles.get(nid) or r.get("creativity_name", r.get("campaign_name", ""))
             by_note[nid] = {
                 "note_id": nid,
-                "name": r.get("creativity_name", r.get("campaign_name", "")),
+                "name": name,
                 "impression": 0, "click": 0, "fee": 0.0,
                 "message_consult": 0, "initiative_message": 0,
                 "msg_leads_num": 0, "interaction": 0,
@@ -470,6 +494,18 @@ def generate_ai_commentary(account: dict, daily_trend: list[dict], notes_all: li
         f"消费TOP3笔记:\n{top_info}"
     )
 
+    # Try Claude CLI first (cheapest, fastest)
+    try:
+        cli_result = subprocess.run(
+            ["claude", "--print", "--model", "sonnet", "-p", prompt],
+            capture_output=True, text=True, timeout=30,
+        )
+        if cli_result.returncode == 0 and cli_result.stdout.strip():
+            return cli_result.stdout.strip()
+    except (FileNotFoundError, subprocess.TimeoutExpired) as e:
+        print(f"Claude CLI unavailable: {e}", file=sys.stderr)
+
+    # Fallback: OpenClaw gateway
     try:
         api_body = json.dumps({
             "model": "sonnet",
@@ -547,6 +583,9 @@ def build_dashboard_data() -> dict:
     print("Fetching note covers...")
     covers = fetch_note_covers()
 
+    print("Fetching note titles...")
+    titles = fetch_note_titles()
+
     # Collect all unique note IDs
     all_note_ids = set()
     for rows in [today_data, week_data, month_data, all_data]:
@@ -572,10 +611,10 @@ def build_dashboard_data() -> dict:
     daily_trend = compute_daily_trend_with_ma(daily_trend)
 
     # Summarize notes per range
-    notes_today = summarize_notes(today_data)
-    notes_week = summarize_notes(week_data)
-    notes_month = summarize_notes(month_data)
-    notes_all = summarize_notes(all_data)
+    notes_today = summarize_notes(today_data, titles)
+    notes_week = summarize_notes(week_data, titles)
+    notes_month = summarize_notes(month_data, titles)
+    notes_all = summarize_notes(all_data, titles)
 
     # D1 + D4: Enrich notes with computed metrics and efficiency scores
     notes_today = enrich_notes_with_metrics(notes_today, daily_trend, "today")
@@ -623,6 +662,7 @@ def build_dashboard_data() -> dict:
                     "notes": notes_all},
         },
         "thumbnails": {nid: f"thumbs/{nid}.jpg" for nid, ok in has_thumb.items() if ok},
+        "note_titles": {nid: t for nid, t in titles.items() if nid in all_note_ids},
     }
 
 
