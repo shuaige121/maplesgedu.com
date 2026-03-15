@@ -9,6 +9,7 @@ import json
 import subprocess
 import sys
 import os
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -22,31 +23,82 @@ HISTORY_FILE = ADS_DIR / "history.json"
 ADVERTISER_ID = 7463472
 WORKER_BASE = "https://api.maplesgedu.com/xhs/api"
 
+# D5: Max retries for API calls
+MAX_RETRIES = 2
+RETRY_DELAY = 3  # seconds
+
 
 def worker_call(endpoint: str, payload: dict) -> dict:
-    """Call XHS API via Cloudflare Worker proxy."""
+    """Call XHS API via Cloudflare Worker proxy. D5: retry on failure."""
     import urllib.request
     import urllib.error
 
     url = f"{WORKER_BASE}/{endpoint}"
     body = json.dumps({"advertiser_id": ADVERTISER_ID, **payload}).encode()
-    req = urllib.request.Request(url, data=body, method="POST", headers={
-        "Content-Type": "application/json",
-        "X-Advertiser-Id": str(ADVERTISER_ID),
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        body_text = e.read().decode("utf-8", errors="replace")
+
+    for attempt in range(MAX_RETRIES):
+        req = urllib.request.Request(url, data=body, method="POST", headers={
+            "Content-Type": "application/json",
+            "X-Advertiser-Id": str(ADVERTISER_ID),
+        })
         try:
-            return json.loads(body_text)
-        except json.JSONDecodeError:
-            print(f"HTTP {e.code} from {endpoint}: {body_text[:200]}", file=sys.stderr)
-            return {"ok": False, "msg": f"HTTP {e.code}"}
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                result = json.loads(resp.read())
+                # D5: Check for token expiry and trigger refresh
+                if result.get("code") in (40004, 40006, "TOKEN_EXPIRED"):
+                    print(f"Token expired on {endpoint}, refreshing...", file=sys.stderr)
+                    _refresh_token()
+                    continue
+                return result
+        except urllib.error.HTTPError as e:
+            body_text = e.read().decode("utf-8", errors="replace")
+            # D5: Handle 401/403 as token issues
+            if e.code in (401, 403) and attempt < MAX_RETRIES - 1:
+                print(f"HTTP {e.code} on {endpoint}, refreshing token (attempt {attempt + 1})...",
+                      file=sys.stderr)
+                _refresh_token()
+                continue
+            try:
+                return json.loads(body_text)
+            except json.JSONDecodeError:
+                if attempt < MAX_RETRIES - 1:
+                    print(f"HTTP {e.code} from {endpoint}, retrying in {RETRY_DELAY}s...",
+                          file=sys.stderr)
+                    time.sleep(RETRY_DELAY)
+                    continue
+                print(f"HTTP {e.code} from {endpoint}: {body_text[:200]}", file=sys.stderr)
+                return {"ok": False, "msg": f"HTTP {e.code}"}
+        except Exception as e:
+            if attempt < MAX_RETRIES - 1:
+                print(f"Request failed for {endpoint}: {e}, retrying...", file=sys.stderr)
+                time.sleep(RETRY_DELAY)
+                continue
+            print(f"Request failed for {endpoint}: {e}", file=sys.stderr)
+            return {"ok": False, "msg": str(e)}
+
+    return {"ok": False, "msg": "max retries exceeded"}
+
+
+def _refresh_token() -> bool:
+    """D5: Call the worker's token refresh endpoint."""
+    import urllib.request
+    try:
+        url = f"{WORKER_BASE}/token.refresh"
+        body = json.dumps({"advertiser_id": ADVERTISER_ID}).encode()
+        req = urllib.request.Request(url, data=body, method="POST", headers={
+            "Content-Type": "application/json",
+            "X-Advertiser-Id": str(ADVERTISER_ID),
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json.loads(resp.read())
+            if result.get("ok"):
+                print("Token refreshed successfully", file=sys.stderr)
+                return True
+            print(f"Token refresh failed: {result.get('msg')}", file=sys.stderr)
+            return False
     except Exception as e:
-        print(f"Request failed for {endpoint}: {e}", file=sys.stderr)
-        return {"ok": False, "msg": str(e)}
+        print(f"Token refresh error: {e}", file=sys.stderr)
+        return False
 
 
 def fetch_note_report(start: str, end: str, time_unit: str = "SUMMARY") -> list[dict]:
@@ -189,6 +241,133 @@ def summarize_notes(rows: list[dict]) -> list[dict]:
     return result
 
 
+def enrich_notes_with_metrics(notes: list[dict], daily_trend: list[dict], range_key: str) -> list[dict]:
+    """D1+D4: Add computed metrics to each note in a range.
+
+    - fee_pct: percentage of total fee for this range
+    - msg_to_lead_rate: message_consult -> msg_leads_num conversion rate
+    - fee_change_7d: 7-day moving average fee change (for 'all' range with daily data)
+    - efficiency_score: normalized composite score (0-100)
+    """
+    if not notes:
+        return notes
+
+    total_fee = sum(n["fee"] for n in notes) or 1  # avoid division by zero
+
+    # D4: Collect values for min-max normalization
+    ctrs = []
+    inv_cpcs = []
+    inv_cpls = []
+    msg_rates = []
+
+    for n in notes:
+        ctr_val = n["click"] / n["impression"] * 100 if n["impression"] > 0 else 0
+        ctrs.append(ctr_val)
+        inv_cpcs.append(1.0 / n["cpc"] if n["cpc"] > 0 else 0)
+        inv_cpls.append(1.0 / n["cpl"] if n["cpl"] > 0 else 0)
+        msg_rate = n["msg_leads_num"] / n["message_consult"] * 100 if n["message_consult"] > 0 else 0
+        msg_rates.append(msg_rate)
+
+    def normalize_list(vals: list[float]) -> list[float]:
+        mn, mx = min(vals), max(vals)
+        rng = mx - mn
+        if rng == 0:
+            return [50.0] * len(vals)
+        return [(v - mn) / rng * 100 for v in vals]
+
+    norm_ctrs = normalize_list(ctrs)
+    norm_inv_cpcs = normalize_list(inv_cpcs)
+    norm_inv_cpls = normalize_list(inv_cpls)
+    norm_msg_rates = normalize_list(msg_rates)
+
+    # D1: Compute 7-day moving average from daily_trend for fee_change_7d
+    fee_change_7d_str = ""
+    if len(daily_trend) >= 2:
+        recent_7 = daily_trend[-7:] if len(daily_trend) >= 7 else daily_trend
+        prev_7 = daily_trend[-14:-7] if len(daily_trend) >= 14 else daily_trend[:len(daily_trend)//2] if len(daily_trend) >= 2 else []
+        if recent_7 and prev_7:
+            avg_recent = sum(d["fee"] for d in recent_7) / len(recent_7)
+            avg_prev = sum(d["fee"] for d in prev_7) / len(prev_7)
+            if avg_prev > 0:
+                pct_change = (avg_recent - avg_prev) / avg_prev * 100
+                fee_change_7d_str = f"{pct_change:+.1f}%"
+
+    for i, n in enumerate(notes):
+        # D1: Fee percentage
+        n["fee_pct"] = round(n["fee"] / total_fee * 100, 1)
+
+        # D1: Message to lead conversion rate
+        if n["message_consult"] > 0:
+            rate = n["msg_leads_num"] / n["message_consult"] * 100
+            n["msg_to_lead_rate"] = f"{rate:.1f}%"
+        else:
+            n["msg_to_lead_rate"] = "N/A"
+
+        # D1: 7-day fee change (same for all notes in a range, based on daily trend)
+        n["fee_change_7d"] = fee_change_7d_str if fee_change_7d_str else "N/A"
+
+        # D4: Efficiency score
+        w1, w2, w3, w4 = 0.25, 0.25, 0.3, 0.2
+        score = (w1 * norm_ctrs[i] + w2 * norm_inv_cpcs[i] +
+                 w3 * norm_inv_cpls[i] + w4 * norm_msg_rates[i])
+        n["efficiency_score"] = round(score, 1)
+
+    return notes
+
+
+def compute_daily_trend_with_ma(daily_trend: list[dict]) -> list[dict]:
+    """D1: Add 7-day moving averages and day-over-day changes to daily trend."""
+    for i, d in enumerate(daily_trend):
+        # Day-over-day fee change
+        if i > 0 and daily_trend[i - 1]["fee"] > 0:
+            pct = (d["fee"] - daily_trend[i - 1]["fee"]) / daily_trend[i - 1]["fee"] * 100
+            d["fee_dod_change"] = f"{pct:+.1f}%"
+        else:
+            d["fee_dod_change"] = "N/A"
+
+        # 7-day moving averages
+        window = daily_trend[max(0, i - 6):i + 1]
+        d["fee_ma7"] = round(sum(x["fee"] for x in window) / len(window), 2)
+        d["ctr_ma7"] = round(sum(x["ctr"] for x in window) / len(window), 2)
+        d["cpc_ma7"] = round(sum(x["cpc"] for x in window) / len(window), 2)
+
+    return daily_trend
+
+
+def build_hourly_trend() -> list[dict]:
+    """D3: Build hourly trend from history.json for today."""
+    if not HISTORY_FILE.exists():
+        return []
+    try:
+        history = json.loads(HISTORY_FILE.read_text())
+    except (json.JSONDecodeError, OSError):
+        return []
+
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_entries = [h for h in history if h.get("timestamp", "").startswith(today_str)]
+
+    if not today_entries:
+        return []
+
+    hourly: list[dict] = []
+    for entry in today_entries:
+        ts = entry.get("timestamp", "")
+        try:
+            hour = ts[11:16]  # "HH:MM"
+        except (IndexError, TypeError):
+            continue
+        hourly.append({
+            "hour": hour,
+            "fee": entry.get("fee", 0),
+            "impression": entry.get("impression", 0),
+            "click": entry.get("click", 0),
+            "message_consult": entry.get("message_consult", 0),
+            "msg_leads_num": entry.get("msg_leads_num", 0),
+        })
+
+    return hourly
+
+
 def build_daily_trend(rows: list[dict]) -> list[dict]:
     """Build daily trend data from DAY-granularity report."""
     by_day: dict[str, dict] = {}
@@ -237,6 +416,103 @@ def append_hourly_snapshot(account_realtime: dict) -> None:
         history = history[-720:]
 
     HISTORY_FILE.write_text(json.dumps(history, ensure_ascii=False))
+
+
+def generate_ai_commentary(account: dict, daily_trend: list[dict], notes_all: list[dict]) -> str:
+    """D2: Generate AI commentary via OpenClaw gateway (localhost:18789)."""
+    import urllib.request
+    import urllib.error
+
+    # Build a concise data summary for the AI
+    total_fee_all = sum(n["fee"] for n in notes_all)
+    total_leads_all = sum(n["msg_leads_num"] for n in notes_all)
+    total_msg_all = sum(n["message_consult"] for n in notes_all)
+
+    # Recent trend info
+    trend_summary = ""
+    if len(daily_trend) >= 2:
+        last = daily_trend[-1]
+        prev = daily_trend[-2]
+        trend_summary = (
+            f"最近两天: {prev['date']} 消费¥{prev['fee']} CTR={prev['ctr']}% | "
+            f"{last['date']} 消费¥{last['fee']} CTR={last['ctr']}%"
+        )
+    if len(daily_trend) >= 7:
+        recent_7_fee = sum(d["fee"] for d in daily_trend[-7:])
+        trend_summary += f" | 近7天总消费¥{recent_7_fee:.0f}"
+
+    # Top 3 notes
+    top_notes = notes_all[:3]
+    top_info = ""
+    for n in top_notes:
+        top_info += (
+            f"  - {n['note_id'][:8]}... 消费¥{n['fee']} CTR={n['ctr']} "
+            f"CPC=¥{n['cpc']} 留资={n['msg_leads_num']}\n"
+        )
+
+    lead_rate_line = ""
+    if total_msg_all > 0:
+        lead_rate_line = f"整体私信转留资率: {total_leads_all / total_msg_all * 100:.1f}%\n"
+
+    prompt = (
+        f"你是小红书聚光平台广告优化师。请根据以下数据给出简短的中文分析评语（100-200字），"
+        f"包含：当前表现总结、异常提醒、优化建议。不要用markdown格式。\n\n"
+        f"账户: UF-SG枫叶留学 (留学机构)\n"
+        f"今日: 消费¥{account.get('today_spend', 0):.2f} "
+        f"曝光={account.get('today_impression', 0)} "
+        f"点击={account.get('today_click', 0)} "
+        f"私信={account.get('today_message', 0)} "
+        f"留资={account.get('today_leads', 0)}\n"
+        f"余额: ¥{account.get('balance', 0)}\n"
+        f"历史总计: 消费¥{total_fee_all:.0f} 私信={total_msg_all} 留资={total_leads_all}\n"
+        f"{lead_rate_line}"
+        f"{trend_summary}\n"
+        f"消费TOP3笔记:\n{top_info}"
+    )
+
+    try:
+        api_body = json.dumps({
+            "model": "sonnet",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500,
+            "temperature": 0.7,
+        }).encode()
+        req = urllib.request.Request(
+            "http://localhost:18789/v1/chat/completions",
+            data=api_body, method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            result = json.loads(resp.read())
+            content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            if content:
+                return content.strip()
+    except Exception as e:
+        print(f"AI commentary generation failed: {e}", file=sys.stderr)
+
+    # Fallback: generate a basic summary without AI
+    return _fallback_commentary(account, daily_trend, total_fee_all, total_msg_all, total_leads_all)
+
+
+def _fallback_commentary(account: dict, daily_trend: list[dict],
+                         total_fee: float, total_msg: int, total_leads: int) -> str:
+    """Generate a basic commentary when AI is unavailable."""
+    parts = []
+    spend = account.get("today_spend", 0)
+    parts.append(f"今日消费¥{spend:.2f}")
+    if account.get("today_click", 0) > 0 and account.get("today_impression", 0) > 0:
+        ctr = account["today_click"] / account["today_impression"] * 100
+        parts.append(f"CTR={ctr:.2f}%")
+    if total_msg > 0:
+        rate = total_leads / total_msg * 100
+        parts.append(f"整体私信转留资率{rate:.1f}%")
+    if len(daily_trend) >= 2:
+        prev_fee = daily_trend[-2]["fee"]
+        last_fee = daily_trend[-1]["fee"]
+        if prev_fee > 0:
+            chg = (last_fee - prev_fee) / prev_fee * 100
+            parts.append(f"消费环比{chg:+.1f}%")
+    return "，".join(parts) + "。(AI评语生成失败，显示基础数据摘要)"
 
 
 def build_dashboard_data() -> dict:
@@ -291,6 +567,22 @@ def build_dashboard_data() -> dict:
     # Append hourly snapshot
     append_hourly_snapshot(account_rt)
 
+    # Build daily trend with D1 enhancements (MA7, DoD change)
+    daily_trend = build_daily_trend(daily_rows)
+    daily_trend = compute_daily_trend_with_ma(daily_trend)
+
+    # Summarize notes per range
+    notes_today = summarize_notes(today_data)
+    notes_week = summarize_notes(week_data)
+    notes_month = summarize_notes(month_data)
+    notes_all = summarize_notes(all_data)
+
+    # D1 + D4: Enrich notes with computed metrics and efficiency scores
+    notes_today = enrich_notes_with_metrics(notes_today, daily_trend, "today")
+    notes_week = enrich_notes_with_metrics(notes_week, daily_trend, "week")
+    notes_month = enrich_notes_with_metrics(notes_month, daily_trend, "month")
+    notes_all = enrich_notes_with_metrics(notes_all, daily_trend, "all")
+
     # Account summary
     account_summary = {
         "balance": budget.get("total_balance") or budget.get("available_balance") or 0,
@@ -304,20 +596,31 @@ def build_dashboard_data() -> dict:
         "today_cpc": float(account_rt.get("acp", 0)),
     }
 
+    # D3: Build hourly trend from history.json
+    print("Building hourly trend from history...")
+    hourly_trend = build_hourly_trend()
+
+    # D2: Generate AI commentary
+    print("Generating AI commentary...")
+    ai_commentary = generate_ai_commentary(account_summary, daily_trend, notes_all)
+    print(f"AI commentary: {ai_commentary[:80]}...")
+
     return {
         "updated_at": now.isoformat(),
         "advertiser": {"id": ADVERTISER_ID, "name": "UF-SG枫叶留学"},
         "account": account_summary,
-        "daily_trend": build_daily_trend(daily_rows),
+        "ai_commentary": ai_commentary,
+        "hourly_trend": hourly_trend,
+        "daily_trend": daily_trend,
         "ranges": {
             "today": {"label": "今日", "start": today, "end": today,
-                      "notes": summarize_notes(today_data)},
+                      "notes": notes_today},
             "week": {"label": "近7天", "start": week_ago, "end": today,
-                     "notes": summarize_notes(week_data)},
+                     "notes": notes_week},
             "month": {"label": "近30天", "start": month_ago, "end": today,
-                      "notes": summarize_notes(month_data)},
+                      "notes": notes_month},
             "all": {"label": "全部", "start": year_ago, "end": today,
-                    "notes": summarize_notes(all_data)},
+                    "notes": notes_all},
         },
         "thumbnails": {nid: f"thumbs/{nid}.jpg" for nid, ok in has_thumb.items() if ok},
     }

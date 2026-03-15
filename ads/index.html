@@ -7,119 +7,478 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
 :root {
   --primary: #4A90D9;
   --primary-light: #6BA8E8;
   --primary-dark: #3A7BC8;
+  --primary-bg: rgba(74,144,217,0.06);
   --accent: #E84A27;
+  --accent-light: #FF6B4A;
   --green: #A4C639;
   --green-light: #C5E06A;
   --sky: #A8D8EA;
   --text: #2D2D2D;
-  --text-light: #666;
+  --text-light: #555;
   --text-muted: #999;
   --bg: #ffffff;
-  --bg-alt: #F5FAFC;
+  --bg-alt: #F5F7FA;
   --bg-card: #ffffff;
   --border: #E8EEF3;
   --shadow: 0 2px 12px rgba(74,144,217,0.08);
-  --shadow-hover: 0 4px 20px rgba(74,144,217,0.14);
+  --shadow-hover: 0 8px 28px rgba(74,144,217,0.16);
   --radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Inter',-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg-alt); color:var(--text); line-height:1.5; }
+body {
+  font-family: 'Inter', -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg-alt);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
 
-/* Header */
-.header { background:#fff; border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:20; }
-.header-left { display:flex; align-items:center; gap:12px; }
-.header-left img { height:40px; border-radius:8px; }
-.header-left h1 { font-size:16px; font-weight:600; color:var(--text); }
+/* ===== Header ===== */
+.header {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.95);
+}
+.header-left { display:flex; align-items:center; gap:14px; }
+.header-left img { height:42px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+.header-left h1 { font-size:17px; font-weight:700; color:var(--text); letter-spacing:-0.3px; }
 .header-left h1 span { color:var(--primary); }
-.header-right { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-muted); }
-.live-dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.header-right { display:flex; align-items:center; gap:12px; }
+.update-info { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.update-time { font-size:12px; color:var(--text-muted); font-weight:500; }
+.countdown { font-size:11px; color:var(--primary); font-weight:600; background:var(--primary-bg); padding:2px 8px; border-radius:20px; }
+.live-dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; flex-shrink:0; }
+@keyframes pulse { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.4; transform:scale(0.8)} }
 
-/* Account Overview */
-.overview { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; padding:16px 24px; }
-.ov-card { background:var(--bg-card); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow); border:1px solid var(--border); }
-.ov-card .ov-label { font-size:11px; color:var(--text-muted); font-weight:500; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
-.ov-card .ov-val { font-size:22px; font-weight:700; color:var(--text); }
-.ov-card .ov-val.blue { color:var(--primary); }
-.ov-card .ov-val.green { color:var(--green); }
-.ov-card .ov-val.red { color:var(--accent); }
-.ov-card .ov-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
+/* ===== Stats Overview Cards ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  padding: 20px 28px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.stat-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: var(--primary);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stat-card:hover::after { opacity: 1; }
+.stat-card.accent::after { background: var(--accent); }
+.stat-card.green::after { background: var(--green); }
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+.stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  transition: var(--transition);
+}
+.stat-value.blue { color: var(--primary); }
+.stat-value.green { color: #2E7D32; }
+.stat-value.red { color: var(--accent); }
+.stat-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.progress-bar {
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.progress-bar .bar {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+.progress-bar .bar.warn {
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+}
 
-/* Progress bar */
-.progress { height:4px; background:var(--border); border-radius:2px; margin-top:6px; overflow:hidden; }
-.progress .bar { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--primary),var(--primary-light)); transition:width .5s; }
+/* ===== AI Commentary ===== */
+.ai-banner {
+  margin: 0 28px 8px;
+  background: linear-gradient(135deg, var(--primary-bg), rgba(168,216,234,0.12));
+  border: 1px solid rgba(74,144,217,0.15);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.ai-banner .ai-icon {
+  font-size: 18px;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.ai-banner .ai-text {
+  font-size: 13px;
+  color: var(--text-light);
+  line-height: 1.6;
+}
 
-/* Tabs */
-.tabs { display:flex; gap:0; padding:0 24px; background:#fff; border-bottom:1px solid var(--border); }
-.tab { padding:10px 20px; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-muted); border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .2s; }
-.tab:hover { color:var(--text); }
-.tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+/* ===== Tabs ===== */
+.tabs-bar {
+  display: flex;
+  gap: 0;
+  padding: 0 28px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+}
+.tab-btn {
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: var(--transition);
+  user-select: none;
+}
+.tab-btn:hover { color: var(--text); background: var(--primary-bg); }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-/* Section */
-.section { padding:16px 24px; }
-.section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.section-title { font-size:14px; font-weight:600; color:var(--text); }
-.section-sub { font-size:12px; color:var(--text-muted); }
+/* ===== Charts ===== */
+.charts-section { padding: 20px 28px; }
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.chart-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+.chart-card:hover { box-shadow: var(--shadow-hover); }
+.chart-card.full { grid-column: 1 / -1; }
+.chart-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chart-title .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.chart-container { width: 100%; }
 
-/* Trend Chart */
-.chart-wrap { background:var(--bg-card); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); border:1px solid var(--border); margin-bottom:16px; }
-.chart-wrap canvas { width:100%!important; height:140px!important; }
-.chart-legend { display:flex; gap:16px; margin-top:8px; }
-.chart-legend span { font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:4px; }
-.chart-legend span::before { content:''; width:10px; height:3px; border-radius:2px; }
-.legend-fee::before { background:var(--primary); }
-.legend-msg::before { background:var(--accent); height:8px!important; width:6px!important; border-radius:1px; }
+/* ===== Notes Table ===== */
+.notes-section { padding: 0 28px 20px; }
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.notes-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.notes-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-alt);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-left: 8px;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  transition: var(--transition);
+}
+.search-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(74,144,217,0.12);
+}
+.search-box svg { width:16px; height:16px; color:var(--text-muted); flex-shrink:0; }
+.search-box input {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+  width: 180px;
+}
+.search-box input::placeholder { color: var(--text-muted); }
 
-/* Note Cards */
-.note-grid { display:flex; flex-direction:column; gap:10px; }
-.note-card { background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); display:flex; overflow:hidden; transition:all .2s; }
-.note-card:hover { box-shadow:var(--shadow-hover); border-color:var(--primary-light); }
-.note-thumb { width:90px; min-height:120px; background:var(--bg-alt); flex-shrink:0; position:relative; }
-.note-thumb img { width:100%; height:100%; object-fit:cover; }
-.note-thumb .placeholder { display:flex; align-items:center; justify-content:center; height:100%; }
-.note-thumb .placeholder svg { width:24px; height:24px; color:#ccc; }
-.note-rank { position:absolute; top:6px; left:6px; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; }
-.note-rank.g { background:linear-gradient(135deg,#FFD700,#FFA000); }
-.note-rank.s { background:linear-gradient(135deg,#B0BEC5,#78909C); }
-.note-rank.b { background:linear-gradient(135deg,#CD7F32,#A0522D); }
-.note-rank.n { background:var(--border); color:var(--text-muted); }
-.note-body { flex:1; padding:10px 14px; display:flex; flex-direction:column; gap:6px; min-width:0; }
-.note-title { font-size:13px; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.note-title a { color:var(--primary); font-size:12px; font-weight:400; margin-left:6px; }
-.note-title a:hover { color:var(--accent); }
-.spend-bar { height:3px; background:var(--border); border-radius:2px; }
-.spend-bar .fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--primary),var(--sky)); }
-.note-metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:4px 8px; }
-.nm { font-size:11px; }
-.nm .v { font-size:14px; font-weight:600; color:var(--text); }
-.nm .l { color:var(--text-muted); font-size:10px; }
-.nm.good .v { color:#2E7D32; }
-.nm.warn .v { color:var(--accent); }
+.notes-table-wrap {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.notes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.notes-table thead th {
+  background: var(--bg-alt);
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: var(--transition);
+  position: relative;
+}
+.notes-table thead th:hover {
+  color: var(--primary);
+  background: rgba(74,144,217,0.06);
+}
+.notes-table thead th.sorted {
+  color: var(--primary);
+}
+.sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 10px;
+  opacity: 0.4;
+  transition: var(--transition);
+}
+.notes-table thead th.sorted .sort-arrow { opacity: 1; }
+.notes-table thead th.sorted.desc .sort-arrow { transform: rotate(180deg); }
+.notes-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+}
+.notes-table tbody tr:last-child { border-bottom: none; }
+.notes-table tbody tr:hover {
+  background: rgba(74,144,217,0.04);
+}
+.notes-table td {
+  padding: 12px 14px;
+  vertical-align: middle;
+}
+.note-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+.note-thumb-small {
+  width: 48px;
+  height: 64px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-alt);
+  position: relative;
+}
+.note-thumb-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.note-thumb-small .placeholder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%; height: 100%;
+  color: #ccc;
+}
+.note-thumb-small .placeholder-icon svg { width:20px; height:20px; }
+.rank-badge {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  z-index: 2;
+}
+.rank-badge.gold { background: linear-gradient(135deg,#FFD700,#FFA000); }
+.rank-badge.silver { background: linear-gradient(135deg,#B0BEC5,#78909C); }
+.rank-badge.bronze { background: linear-gradient(135deg,#CD7F32,#A0522D); }
+.rank-badge.normal { background: var(--border); color: var(--text-muted); font-size:9px; }
+.note-info { min-width: 0; }
+.note-name {
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  font-size: 13px;
+}
+.note-link {
+  font-size: 11px;
+  color: var(--primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 2px;
+}
+.note-link:hover { color: var(--accent); }
+.td-num {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.td-num.good { color: #2E7D32; }
+.td-num.warn { color: var(--accent); }
+.spend-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spend-mini-bar {
+  width: 50px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.spend-mini-bar .fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--sky));
+}
 
-.empty { text-align:center; padding:48px 20px; color:var(--text-muted); font-size:14px; }
+.empty-msg {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
 
-/* Footer */
-.footer { text-align:center; padding:24px; font-size:11px; color:var(--text-muted); }
-.footer a { color:var(--primary); }
+/* ===== Footer ===== */
+.footer {
+  text-align: center;
+  padding: 28px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+}
+.footer a { color: var(--primary); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
 
-@media(max-width:640px) {
-  .header { padding:10px 16px; }
-  .overview { grid-template-columns:repeat(2,1fr); padding:12px 16px; gap:8px; }
-  .section { padding:12px 16px; }
-  .tabs { padding:0 16px; }
-  .note-thumb { width:72px; min-height:96px; }
-  .note-metrics { grid-template-columns:repeat(3,1fr); }
-  .ov-card .ov-val { font-size:18px; }
+/* ===== countUp Animation ===== */
+.count-up {
+  display: inline-block;
+  transition: var(--transition);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1200px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+  .charts-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .header { padding: 10px 16px; }
+  .header-left h1 { font-size: 14px; }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  .stat-card { padding: 14px 16px; }
+  .stat-value { font-size: 20px; }
+  .charts-section { padding: 12px 16px; }
+  .charts-row { grid-template-columns: 1fr; gap: 12px; }
+  .chart-card { padding: 14px; }
+  .notes-section { padding: 0 16px 16px; }
+  .tabs-bar { padding: 0 16px; overflow-x: auto; }
+  .tab-btn { padding: 10px 16px; font-size: 12px; white-space: nowrap; }
+  .notes-table-wrap { overflow-x: auto; }
+  .notes-table { min-width: 700px; }
+  .search-box input { width: 120px; }
+  .ai-banner { margin: 0 16px 8px; padding: 12px 14px; }
+  .notes-header { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 400px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-value { font-size: 22px; }
+  .header-left img { height: 34px; }
 }
 </style>
 </head>
 <body>
 
+<!-- Header -->
 <div class="header">
   <div class="header-left">
     <img src="../images/logo.jpg" alt="SG枫叶留学">
@@ -127,228 +486,823 @@ body { font-family:'Inter',-apple-system,"PingFang SC","Microsoft YaHei",sans-se
   </div>
   <div class="header-right">
     <div class="live-dot"></div>
-    <span id="updateTime">加载中...</span>
-  </div>
-</div>
-
-<div class="overview" id="overview"></div>
-
-<div class="tabs" id="tabs">
-  <div class="tab active" data-range="today">今日实时</div>
-  <div class="tab" data-range="week">近 7 天</div>
-  <div class="tab" data-range="month">近 30 天</div>
-  <div class="tab" data-range="all">全部</div>
-</div>
-
-<div class="section">
-  <div class="section-head">
-    <div class="section-title">每日趋势</div>
-    <div class="chart-legend">
-      <span class="legend-fee">消费</span>
-      <span class="legend-msg">私信</span>
+    <div class="update-info">
+      <span class="update-time" id="updateTime">加载中...</span>
+      <span class="countdown" id="countdown">--:--</span>
     </div>
   </div>
-  <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
 </div>
 
-<div class="section">
-  <div class="section-head">
-    <div class="section-title" id="noteTitle">笔记排行</div>
-    <div class="section-sub" id="noteCount"></div>
+<!-- Stats Cards -->
+<div class="stats-grid" id="statsGrid"></div>
+
+<!-- AI Commentary -->
+<div class="ai-banner" id="aiBanner" style="display:none">
+  <span class="ai-icon">&#x1f4ca;</span>
+  <div class="ai-text" id="aiText"></div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs-bar" id="tabsBar">
+  <div class="tab-btn active" data-range="today">今日实时</div>
+  <div class="tab-btn" data-range="week">近 7 天</div>
+  <div class="tab-btn" data-range="month">近 30 天</div>
+  <div class="tab-btn" data-range="all">全部</div>
+</div>
+
+<!-- Charts -->
+<div class="charts-section">
+  <div class="charts-row">
+    <div class="chart-card full">
+      <div class="chart-title"><span class="dot" style="background:var(--primary)"></span>消费趋势</div>
+      <div id="trendChart" class="chart-container" style="height:260px"></div>
+    </div>
   </div>
-  <div class="note-grid" id="noteGrid"><div class="empty">加载中...</div></div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--green)"></span>CTR / CPC 双轴</div>
+      <div id="ctrCpcChart" class="chart-container" style="height:240px"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent)"></span>私信 vs 留资</div>
+      <div id="msgLeadsChart" class="chart-container" style="height:240px"></div>
+    </div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--sky)"></span>笔记消费占比</div>
+      <div id="pieChart" class="chart-container" style="height:280px"></div>
+    </div>
+    <div class="chart-card" id="engagementCard" style="display:none">
+      <div class="chart-title"><span class="dot" style="background:#FF9800"></span>互动数据分布</div>
+      <div id="engagementChart" class="chart-container" style="height:280px"></div>
+    </div>
+  </div>
 </div>
 
+<!-- Notes Table -->
+<div class="notes-section">
+  <div class="notes-header">
+    <div style="display:flex;align-items:center;">
+      <span class="notes-title" id="notesTitle">笔记排行</span>
+      <span class="notes-count" id="notesCount">0 篇</span>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="搜索笔记名称...">
+    </div>
+  </div>
+  <div class="notes-table-wrap">
+    <table class="notes-table" id="notesTable">
+      <thead>
+        <tr>
+          <th data-key="rank" style="width:60px"># 排名</th>
+          <th data-key="name">笔记</th>
+          <th data-key="fee" data-type="number" class="sorted desc">消费 <span class="sort-arrow">&#9650;</span></th>
+          <th data-key="impression" data-type="number">展现 <span class="sort-arrow">&#9650;</span></th>
+          <th data-key="ctr_val" data-type="number">CTR <span class="sort-arrow">&#9650;</span></th>
+          <th data-key="cpc" data-type="number">CPC <span class="sort-arrow">&#9650;</span></th>
+          <th data-key="message_consult" data-type="number">私信 <span class="sort-arrow">&#9650;</span></th>
+          <th data-key="msg_leads_num" data-type="number">留资 <span class="sort-arrow">&#9650;</span></th>
+        </tr>
+      </thead>
+      <tbody id="notesBody">
+        <tr><td colspan="8" class="empty-msg">加载中...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Footer -->
 <div class="footer">
-  <a href="../index.html">SG枫叶留学</a> · 聚光平台数据每小时自动更新
+  <a href="../index.html">SG枫叶留学</a> &middot; 聚光平台数据每小时自动更新
 </div>
 
 <script>
-let D = null, range = 'today';
+/* ===== Globals ===== */
+let DATA = null;
+let currentRange = 'today';
+let sortKey = 'fee';
+let sortAsc = false;
+let searchTerm = '';
+let countdownSec = 300;
+let countdownTimer = null;
 
-// SVG icons
-const ICON = {
-  image: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
-  link: '↗',
-};
+/* ECharts instances */
+let chartTrend, chartCtrCpc, chartMsgLeads, chartPie, chartEngagement;
 
-async function load() {
-  try {
-    const r = await fetch('data.json?' + Date.now());
-    D = await r.json();
-    const t = new Date(D.updated_at);
-    document.getElementById('updateTime').textContent = t.toLocaleString('zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    renderOverview();
-    renderTrend();
-    renderNotes();
-  } catch(e) { document.getElementById('noteGrid').innerHTML = '<div class="empty">数据加载失败，请稍后刷新</div>'; }
+const ICON_IMAGE = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+
+/* ===== CountUp Animation ===== */
+function animateValue(el, start, end, duration, formatter) {
+  if (!el) return;
+  const startTime = performance.now();
+  const diff = end - start;
+  function step(ts) {
+    const progress = Math.min((ts - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    const current = start + diff * eased;
+    el.textContent = formatter ? formatter(current) : Math.round(current).toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
-function renderOverview() {
-  const a = D.account || {};
+/* ===== Load Data ===== */
+async function loadData() {
+  try {
+    const res = await fetch('data.json?' + Date.now());
+    DATA = await res.json();
+
+    const t = new Date(DATA.updated_at);
+    document.getElementById('updateTime').textContent =
+      t.toLocaleString('zh-CN', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+
+    renderStats();
+    renderAI();
+    renderTrendChart();
+    renderCtrCpcChart();
+    renderMsgLeadsChart();
+    renderPieChart();
+    renderEngagementChart();
+    renderNotesTable();
+
+    // Reset countdown
+    countdownSec = 300;
+    startCountdown();
+  } catch (e) {
+    console.error('Data load failed:', e);
+    document.getElementById('notesBody').innerHTML =
+      '<tr><td colspan="8" class="empty-msg">数据加载失败，请稍后刷新</td></tr>';
+  }
+}
+
+/* ===== Countdown ===== */
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    countdownSec--;
+    if (countdownSec <= 0) {
+      clearInterval(countdownTimer);
+      loadData();
+      return;
+    }
+    const m = Math.floor(countdownSec / 60);
+    const s = countdownSec % 60;
+    document.getElementById('countdown').textContent =
+      m + ':' + String(s).padStart(2, '0') + ' 后刷新';
+  }, 1000);
+}
+
+/* ===== Render Stats Cards ===== */
+function renderStats() {
+  const a = DATA.account || {};
   const bal = a.balance || 0;
   const spend = a.today_spend || 0;
-  const budget = a.daily_budget || 1;
-  const pct = Math.min(Math.round(spend / (budget / 100) * 100), 100) || 0;
-  const balClass = bal > 500000 ? 'blue' : bal > 100000 ? '' : 'red';
+  const budget = a.daily_budget || 0;
+  const imp = a.today_impression || 0;
+  const click = a.today_click || 0;
+  const msg = a.today_message || 0;
+  const leads = a.today_leads || 0;
+  const ctr = a.today_ctr || '0%';
+  const cpc = a.today_cpc || 0;
 
-  document.getElementById('overview').innerHTML = `
-    <div class="ov-card">
-      <div class="ov-label">账户余额</div>
-      <div class="ov-val ${balClass}">¥${(bal/100).toLocaleString('zh-CN',{maximumFractionDigits:0})}</div>
+  const budgetVal = budget > 0 ? budget / 100 : 0;
+  const pct = budgetVal > 0 ? Math.min(Math.round(spend / budgetVal * 100), 100) : 0;
+  const balVal = bal > 0 ? bal / 100 : 0;
+  const balClass = balVal > 5000 ? 'blue' : balVal > 1000 ? '' : 'red';
+
+  // Computed metrics
+  const avgCpc = click > 0 ? (spend / click) : 0;
+  const avgLeadCost = leads > 0 ? (spend / leads) : 0;
+  const msgToLead = msg > 0 ? ((leads / msg) * 100) : 0;
+
+  const cards = [
+    {
+      label: '账户余额',
+      value: '\u00a5' + balVal.toLocaleString('zh-CN', { maximumFractionDigits: 0 }),
+      cls: balClass,
+      sub: budgetVal > 0 ? '日预算 \u00a5' + budgetVal.toLocaleString() : '未设日预算',
+      type: ''
+    },
+    {
+      label: '今日消费',
+      value: '\u00a5' + spend.toFixed(0),
+      cls: '',
+      sub: budgetVal > 0 ? '已消耗 ' + pct + '%' : '',
+      progress: pct,
+      progressWarn: pct > 85,
+      type: 'accent'
+    },
+    {
+      label: '展现',
+      value: imp.toLocaleString(),
+      cls: '',
+      sub: click + ' 点击',
+      type: ''
+    },
+    {
+      label: '点击率 CTR',
+      value: ctr,
+      cls: '',
+      sub: '',
+      type: ''
+    },
+    {
+      label: '私信',
+      value: String(msg),
+      cls: 'blue',
+      sub: msg > 0 ? '\u00a5' + (spend / msg).toFixed(0) + '/条' : '',
+      type: ''
+    },
+    {
+      label: '留资',
+      value: String(leads),
+      cls: leads > 0 ? 'green' : '',
+      sub: leads > 0 ? '\u00a5' + avgLeadCost.toFixed(0) + '/条' : '',
+      type: 'green'
+    },
+    {
+      label: '平均CPC',
+      value: '\u00a5' + avgCpc.toFixed(2),
+      cls: '',
+      sub: '',
+      type: ''
+    },
+    {
+      label: '平均留资成本',
+      value: leads > 0 ? '\u00a5' + avgLeadCost.toFixed(0) : '-',
+      cls: avgLeadCost > 0 && avgLeadCost < 400 ? 'green' : avgLeadCost > 800 ? 'red' : '',
+      sub: '',
+      type: ''
+    },
+    {
+      label: '私信转留资率',
+      value: msg > 0 ? msgToLead.toFixed(1) + '%' : '-',
+      cls: msgToLead > 30 ? 'green' : msgToLead > 0 ? '' : '',
+      sub: '',
+      type: ''
+    },
+    {
+      label: '今日CPC',
+      value: cpc > 0 ? '\u00a5' + cpc.toFixed(2) : '-',
+      cls: '',
+      sub: '',
+      type: ''
+    }
+  ];
+
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = cards.map(c => `
+    <div class="stat-card ${c.type}">
+      <div class="stat-label">${c.label}</div>
+      <div class="stat-value ${c.cls}">${c.value}</div>
+      ${c.sub ? '<div class="stat-sub">' + c.sub + '</div>' : ''}
+      ${c.progress !== undefined ? `
+        <div class="progress-bar">
+          <div class="bar ${c.progressWarn ? 'warn' : ''}" style="width:${c.progress}%"></div>
+        </div>` : ''}
     </div>
-    <div class="ov-card">
-      <div class="ov-label">今日消费</div>
-      <div class="ov-val">¥${spend.toFixed(0)}</div>
-      <div class="progress"><div class="bar" style="width:${pct}%"></div></div>
-      <div class="ov-sub">日预算 ¥${(budget/100).toFixed(0)} · ${pct}%</div>
-    </div>
-    <div class="ov-card">
-      <div class="ov-label">展现 / 点击</div>
-      <div class="ov-val">${(a.today_impression||0).toLocaleString()}</div>
-      <div class="ov-sub">${a.today_click||0} 点击 · CTR ${a.today_ctr||'0%'}</div>
-    </div>
-    <div class="ov-card">
-      <div class="ov-label">私信 / 留资</div>
-      <div class="ov-val blue">${a.today_message||0}</div>
-      <div class="ov-sub">${a.today_leads||0} 留资${a.today_message > 0 ? ' · ¥'+(spend/a.today_message).toFixed(0)+'/条' : ''}</div>
-    </div>
-  `;
+  `).join('');
 }
 
-function renderTrend() {
-  const canvas = document.getElementById('trendChart');
-  const ctx = canvas.getContext('2d');
-  const trend = D.daily_trend || [];
-  if (trend.length < 2) { return; }
+/* ===== AI Commentary ===== */
+function renderAI() {
+  const text = DATA.ai_commentary;
+  if (!text) {
+    document.getElementById('aiBanner').style.display = 'none';
+    return;
+  }
+  document.getElementById('aiBanner').style.display = 'flex';
+  document.getElementById('aiText').textContent = text;
+}
 
-  const W = canvas.parentElement.clientWidth - 32;
-  const H = 140;
-  canvas.width = W * 2; canvas.height = H * 2;
-  canvas.style.width = W+'px'; canvas.style.height = H+'px';
-  ctx.scale(2,2);
+/* ===== Trend Chart (消费趋势线图) ===== */
+function renderTrendChart() {
+  const trend = DATA.daily_trend || [];
+  if (trend.length < 1) return;
 
-  const fees = trend.map(d=>d.fee);
-  const maxFee = Math.max(...fees,1);
-  const msgs = trend.map(d=>d.message_consult);
-  const maxMsg = Math.max(...msgs,1);
-  const pad = {l:44,r:12,t:12,b:22};
-  const cw = W-pad.l-pad.r, ch = H-pad.t-pad.b;
-
-  // Grid lines
-  ctx.strokeStyle = '#E8EEF3'; ctx.lineWidth = 0.5;
-  for (let i=0;i<=4;i++) {
-    const y = pad.t + ch * i / 4;
-    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(W-pad.r,y); ctx.stroke();
+  if (!chartTrend) {
+    chartTrend = echarts.init(document.getElementById('trendChart'));
   }
 
-  // Fee area
-  ctx.beginPath();
-  trend.forEach((d,i) => {
-    const x = pad.l + (i/(trend.length-1))*cw;
-    const y = pad.t + ch - (d.fee/maxFee)*ch;
-    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-  });
-  const lastX = pad.l + cw;
-  ctx.lineTo(lastX, pad.t+ch); ctx.lineTo(pad.l, pad.t+ch); ctx.closePath();
-  ctx.fillStyle = 'rgba(74,144,217,0.08)'; ctx.fill();
+  const dates = trend.map(d => d.date.slice(5));
+  const fees = trend.map(d => d.fee);
+  const impressions = trend.map(d => d.impression);
 
-  // Fee line
-  ctx.beginPath();
-  trend.forEach((d,i) => {
-    const x = pad.l + (i/(trend.length-1))*cw;
-    const y = pad.t + ch - (d.fee/maxFee)*ch;
-    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  chartTrend.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(255,255,255,0.96)',
+      borderColor: '#E8EEF3',
+      textStyle: { color: '#2D2D2D', fontSize: 12 },
+      axisPointer: { type: 'cross', crossStyle: { color: '#999' } }
+    },
+    legend: {
+      data: ['消费', '展现'],
+      top: 0, right: 0,
+      textStyle: { fontSize: 11, color: '#999' },
+      icon: 'roundRect',
+      itemWidth: 14, itemHeight: 3
+    },
+    grid: { left: 50, right: 50, top: 36, bottom: 28 },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLine: { lineStyle: { color: '#E8EEF3' } },
+      axisTick: { show: false },
+      axisLabel: { color: '#999', fontSize: 11 }
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '消费 (\u00a5)',
+        nameTextStyle: { color: '#999', fontSize: 10 },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { lineStyle: { color: '#F0F0F0' } },
+        axisLabel: { color: '#999', fontSize: 10, formatter: v => '\u00a5' + v }
+      },
+      {
+        type: 'value',
+        name: '展现',
+        nameTextStyle: { color: '#999', fontSize: 10 },
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        axisLabel: { color: '#999', fontSize: 10 }
+      }
+    ],
+    series: [
+      {
+        name: '消费',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 6,
+        lineStyle: { width: 3, color: '#4A90D9' },
+        itemStyle: { color: '#4A90D9' },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(74,144,217,0.20)' },
+            { offset: 1, color: 'rgba(74,144,217,0.02)' }
+          ])
+        },
+        data: fees,
+        animationDuration: 1200,
+        animationEasing: 'cubicOut'
+      },
+      {
+        name: '展现',
+        type: 'bar',
+        yAxisIndex: 1,
+        barWidth: '40%',
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(168,216,234,0.7)' },
+            { offset: 1, color: 'rgba(168,216,234,0.2)' }
+          ]),
+          borderRadius: [3, 3, 0, 0]
+        },
+        data: impressions,
+        animationDuration: 1200,
+        animationDelay: 200
+      }
+    ]
   });
-  ctx.strokeStyle = '#4A90D9'; ctx.lineWidth = 2; ctx.stroke();
-
-  // Dots on fee line
-  trend.forEach((d,i) => {
-    const x = pad.l + (i/(trend.length-1))*cw;
-    const y = pad.t + ch - (d.fee/maxFee)*ch;
-    ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2);
-    ctx.fillStyle='#4A90D9'; ctx.fill();
-  });
-
-  // Message bars
-  const bw = Math.max(cw/trend.length*0.35, 3);
-  trend.forEach((d,i) => {
-    if (!d.message_consult) return;
-    const x = pad.l + (i/(trend.length-1))*cw - bw/2;
-    const h = (d.message_consult/maxMsg)*ch*0.6;
-    ctx.fillStyle = 'rgba(232,74,39,0.5)';
-    ctx.fillRect(x, pad.t+ch-h, bw, h);
-  });
-
-  // Axis labels
-  ctx.fillStyle = '#999'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign='left';
-  ctx.fillText(trend[0].date.slice(5), pad.l, H-4);
-  ctx.textAlign='right';
-  ctx.fillText(trend[trend.length-1].date.slice(5), W-pad.r, H-4);
-  ctx.textAlign='left';
-  ctx.fillStyle='#4A90D9'; ctx.fillText('¥'+maxFee.toFixed(0), 2, pad.t+10);
 }
 
-function renderNotes() {
-  const rng = D.ranges[range];
+/* ===== CTR/CPC Chart ===== */
+function renderCtrCpcChart() {
+  const trend = DATA.daily_trend || [];
+  if (trend.length < 1) return;
+
+  if (!chartCtrCpc) {
+    chartCtrCpc = echarts.init(document.getElementById('ctrCpcChart'));
+  }
+
+  const dates = trend.map(d => d.date.slice(5));
+  const ctrs = trend.map(d => typeof d.ctr === 'string' ? parseFloat(d.ctr) : d.ctr);
+  const cpcs = trend.map(d => d.cpc);
+
+  chartCtrCpc.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(255,255,255,0.96)',
+      borderColor: '#E8EEF3',
+      textStyle: { color: '#2D2D2D', fontSize: 12 }
+    },
+    legend: {
+      data: ['CTR (%)', 'CPC (\u00a5)'],
+      top: 0, right: 0,
+      textStyle: { fontSize: 11, color: '#999' },
+      icon: 'roundRect',
+      itemWidth: 14, itemHeight: 3
+    },
+    grid: { left: 45, right: 45, top: 36, bottom: 28 },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLine: { lineStyle: { color: '#E8EEF3' } },
+      axisTick: { show: false },
+      axisLabel: { color: '#999', fontSize: 10 }
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: 'CTR %',
+        nameTextStyle: { color: '#999', fontSize: 10 },
+        axisLine: { show: false },
+        splitLine: { lineStyle: { color: '#F0F0F0' } },
+        axisLabel: { color: '#999', fontSize: 10, formatter: v => v + '%' }
+      },
+      {
+        type: 'value',
+        name: 'CPC \u00a5',
+        nameTextStyle: { color: '#999', fontSize: 10 },
+        axisLine: { show: false },
+        splitLine: { show: false },
+        axisLabel: { color: '#999', fontSize: 10, formatter: v => '\u00a5' + v }
+      }
+    ],
+    series: [
+      {
+        name: 'CTR (%)',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 6,
+        lineStyle: { width: 2.5, color: '#A4C639' },
+        itemStyle: { color: '#A4C639' },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(164,198,57,0.15)' },
+            { offset: 1, color: 'rgba(164,198,57,0.02)' }
+          ])
+        },
+        data: ctrs,
+        animationDuration: 1000
+      },
+      {
+        name: 'CPC (\u00a5)',
+        type: 'line',
+        yAxisIndex: 1,
+        smooth: true,
+        symbol: 'diamond',
+        symbolSize: 6,
+        lineStyle: { width: 2.5, color: '#E84A27' },
+        itemStyle: { color: '#E84A27' },
+        data: cpcs,
+        animationDuration: 1000,
+        animationDelay: 200
+      }
+    ]
+  });
+}
+
+/* ===== 私信 vs 留资 柱状图 ===== */
+function renderMsgLeadsChart() {
+  const trend = DATA.daily_trend || [];
+  if (trend.length < 1) return;
+
+  if (!chartMsgLeads) {
+    chartMsgLeads = echarts.init(document.getElementById('msgLeadsChart'));
+  }
+
+  const dates = trend.map(d => d.date.slice(5));
+  const msgs = trend.map(d => d.message_consult);
+  const leads = trend.map(d => d.msg_leads_num);
+
+  chartMsgLeads.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(255,255,255,0.96)',
+      borderColor: '#E8EEF3',
+      textStyle: { color: '#2D2D2D', fontSize: 12 }
+    },
+    legend: {
+      data: ['私信', '留资'],
+      top: 0, right: 0,
+      textStyle: { fontSize: 11, color: '#999' },
+      icon: 'roundRect',
+      itemWidth: 14, itemHeight: 3
+    },
+    grid: { left: 40, right: 16, top: 36, bottom: 28 },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLine: { lineStyle: { color: '#E8EEF3' } },
+      axisTick: { show: false },
+      axisLabel: { color: '#999', fontSize: 10 }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: '#F0F0F0' } },
+      axisLabel: { color: '#999', fontSize: 10 },
+      minInterval: 1
+    },
+    series: [
+      {
+        name: '私信',
+        type: 'bar',
+        barGap: '20%',
+        barWidth: '35%',
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: '#4A90D9' },
+            { offset: 1, color: '#A8D8EA' }
+          ]),
+          borderRadius: [4, 4, 0, 0]
+        },
+        data: msgs,
+        animationDuration: 1000
+      },
+      {
+        name: '留资',
+        type: 'bar',
+        barWidth: '35%',
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: '#E84A27' },
+            { offset: 1, color: '#FF9A76' }
+          ]),
+          borderRadius: [4, 4, 0, 0]
+        },
+        data: leads,
+        animationDuration: 1000,
+        animationDelay: 200
+      }
+    ]
+  });
+}
+
+/* ===== 笔记消费占比饼图 ===== */
+function renderPieChart() {
+  const rng = DATA.ranges[currentRange];
   if (!rng) return;
   const notes = rng.notes || [];
-  document.getElementById('noteTitle').textContent = rng.label + '笔记排行';
-  document.getElementById('noteCount').textContent = notes.length + ' 篇';
+
+  if (!chartPie) {
+    chartPie = echarts.init(document.getElementById('pieChart'));
+  }
+
+  // Group: top 6 by fee, rest as "其他"
+  const sorted = [...notes].sort((a, b) => b.fee - a.fee);
+  const top = sorted.slice(0, 6);
+  const rest = sorted.slice(6);
+  const restFee = rest.reduce((s, n) => s + n.fee, 0);
+
+  const pieData = top.map(n => ({
+    name: (n.name || n.note_id.slice(-8)).slice(0, 12),
+    value: Math.round(n.fee * 100) / 100
+  }));
+  if (restFee > 0) {
+    pieData.push({ name: '其他 (' + rest.length + '篇)', value: Math.round(restFee * 100) / 100 });
+  }
+
+  const colors = ['#4A90D9', '#E84A27', '#A4C639', '#A8D8EA', '#FF9800', '#9C27B0', '#78909C'];
+
+  chartPie.setOption({
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(255,255,255,0.96)',
+      borderColor: '#E8EEF3',
+      textStyle: { color: '#2D2D2D', fontSize: 12 },
+      formatter: p => p.name + '<br/>消费: \u00a5' + p.value.toFixed(2) + ' (' + p.percent + '%)'
+    },
+    legend: {
+      orient: 'vertical',
+      right: 8,
+      top: 'center',
+      textStyle: { fontSize: 11, color: '#666' },
+      icon: 'circle',
+      itemWidth: 8,
+      itemGap: 8,
+      formatter: name => name.length > 10 ? name.slice(0, 10) + '...' : name
+    },
+    color: colors,
+    series: [{
+      type: 'pie',
+      radius: ['42%', '70%'],
+      center: ['35%', '50%'],
+      avoidLabelOverlap: true,
+      padAngle: 2,
+      itemStyle: { borderRadius: 6 },
+      label: {
+        show: false
+      },
+      emphasis: {
+        label: {
+          show: true,
+          fontSize: 13,
+          fontWeight: 600
+        },
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0,0,0,0.15)'
+        }
+      },
+      data: pieData,
+      animationType: 'scale',
+      animationEasing: 'elasticOut',
+      animationDuration: 1200
+    }]
+  });
+}
+
+/* ===== Engagement Chart (互动数据) ===== */
+function renderEngagementChart() {
+  const rng = DATA.ranges[currentRange];
+  if (!rng) return;
+  const notes = rng.notes || [];
+
+  // Sum engagement metrics
+  let totalLike = 0, totalCollect = 0, totalComment = 0, totalShare = 0, totalFollow = 0;
+  notes.forEach(n => {
+    totalLike += n.like || 0;
+    totalCollect += n.collect || 0;
+    totalComment += n.comment || 0;
+    totalShare += n.share || 0;
+    totalFollow += n.follow || 0;
+  });
+
+  const total = totalLike + totalCollect + totalComment + totalShare + totalFollow;
+  if (total === 0) {
+    document.getElementById('engagementCard').style.display = 'none';
+    return;
+  }
+  document.getElementById('engagementCard').style.display = '';
+
+  if (!chartEngagement) {
+    chartEngagement = echarts.init(document.getElementById('engagementChart'));
+  }
+
+  chartEngagement.setOption({
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(255,255,255,0.96)',
+      borderColor: '#E8EEF3',
+      textStyle: { color: '#2D2D2D', fontSize: 12 }
+    },
+    color: ['#FF6B6B', '#FFC107', '#4CAF50', '#2196F3', '#9C27B0'],
+    series: [{
+      type: 'pie',
+      radius: '65%',
+      center: ['50%', '52%'],
+      roseType: 'area',
+      itemStyle: { borderRadius: 6 },
+      label: {
+        fontSize: 11,
+        color: '#666',
+        formatter: '{b}: {c}'
+      },
+      data: [
+        { name: '点赞', value: totalLike },
+        { name: '收藏', value: totalCollect },
+        { name: '评论', value: totalComment },
+        { name: '分享', value: totalShare },
+        { name: '关注', value: totalFollow }
+      ].filter(d => d.value > 0),
+      animationType: 'scale',
+      animationDuration: 1000
+    }]
+  });
+}
+
+/* ===== Notes Table ===== */
+function renderNotesTable() {
+  const rng = DATA.ranges[currentRange];
+  if (!rng) return;
+
+  let notes = [...(rng.notes || [])];
+
+  document.getElementById('notesTitle').textContent = rng.label + '笔记排行';
+
+  // Search filter
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    notes = notes.filter(n => {
+      const name = (n.name || n.note_id).toLowerCase();
+      return name.includes(q);
+    });
+  }
+
+  document.getElementById('notesCount').textContent = notes.length + ' 篇';
 
   if (!notes.length) {
-    document.getElementById('noteGrid').innerHTML = '<div class="empty">该时段暂无投放数据</div>';
+    document.getElementById('notesBody').innerHTML =
+      '<tr><td colspan="8" class="empty-msg">该时段暂无匹配数据</td></tr>';
     return;
   }
 
-  const maxFee = Math.max(...notes.map(n=>n.fee),1);
+  // Parse CTR for sorting
+  notes.forEach(n => {
+    n.ctr_val = typeof n.ctr === 'string' ? parseFloat(n.ctr) : (n.ctr || 0);
+  });
 
-  document.getElementById('noteGrid').innerHTML = notes.map((n,i) => {
-    const thumb = D.thumbnails[n.note_id];
-    const link = `https://www.xiaohongshu.com/explore/${n.note_id}`;
-    const pct = (n.fee/maxFee*100).toFixed(0);
-    const rc = i===0?'g':i===1?'s':i===2?'b':'n';
+  // Sort
+  notes.sort((a, b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if (typeof va === 'string') va = parseFloat(va) || 0;
+    if (typeof vb === 'string') vb = parseFloat(vb) || 0;
+    return sortAsc ? va - vb : vb - va;
+  });
 
-    const cplVal = n.cpl > 0 ? '¥'+n.cpl : '-';
-    const cplClass = n.cpl > 0 ? (n.cpl < 400 ? 'good' : n.cpl > 800 ? 'warn' : '') : '';
-    const mcVal = n.msg_cost > 0 ? '¥'+n.msg_cost : '-';
+  const maxFee = Math.max(...notes.map(n => n.fee), 1);
 
-    return `<div class="note-card">
-      <div class="note-thumb">
-        <span class="note-rank ${rc}">${i+1}</span>
-        ${thumb
-          ? `<a href="${link}" target="_blank" rel="noopener"><img src="${thumb}" alt="" loading="lazy"></a>`
-          : `<a href="${link}" target="_blank" rel="noopener"><div class="placeholder">${ICON.image}</div></a>`}
-      </div>
-      <div class="note-body">
-        <div class="note-title">${n.name||n.note_id.slice(-8)}<a href="${link}" target="_blank" rel="noopener">${ICON.link}</a></div>
-        <div class="spend-bar"><div class="fill" style="width:${pct}%"></div></div>
-        <div class="note-metrics">
-          <div class="nm"><div class="v">¥${n.fee.toFixed(0)}</div><div class="l">消费</div></div>
-          <div class="nm"><div class="v">${n.impression.toLocaleString()}</div><div class="l">展现</div></div>
-          <div class="nm"><div class="v">${n.click}</div><div class="l">点击</div></div>
-          <div class="nm"><div class="v">${n.ctr}</div><div class="l">CTR</div></div>
-          <div class="nm"><div class="v">¥${n.cpc||0}</div><div class="l">CPC</div></div>
-          <div class="nm"><div class="v">${n.message_consult}</div><div class="l">私信</div></div>
-          <div class="nm ${cplClass}"><div class="v">${cplVal}</div><div class="l">留资成本</div></div>
-          <div class="nm"><div class="v">${n.msg_leads_num}</div><div class="l">留资</div></div>
+  document.getElementById('notesBody').innerHTML = notes.map((n, i) => {
+    const thumb = DATA.thumbnails[n.note_id];
+    const link = 'https://www.xiaohongshu.com/explore/' + n.note_id;
+    const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'normal';
+    const ctrStr = typeof n.ctr === 'string' ? n.ctr : n.ctr + '%';
+    const feePct = (n.fee / maxFee * 100).toFixed(0);
+
+    const cplVal = n.cpl > 0 ? '\u00a5' + n.cpl : '-';
+    const cpcClass = n.cpc > 10 ? 'warn' : n.cpc > 0 && n.cpc < 4 ? 'good' : '';
+
+    return `<tr>
+      <td><span class="rank-badge ${rankCls}" style="position:static;display:inline-flex">${i + 1}</span></td>
+      <td>
+        <div class="note-cell">
+          <div class="note-thumb-small">
+            ${thumb
+              ? '<a href="' + link + '" target="_blank" rel="noopener"><img src="' + thumb + '" alt="" loading="lazy"></a>'
+              : '<a href="' + link + '" target="_blank" rel="noopener"><div class="placeholder-icon">' + ICON_IMAGE + '</div></a>'}
+          </div>
+          <div class="note-info">
+            <div class="note-name">${n.name || n.note_id.slice(-10)}</div>
+            <a class="note-link" href="${link}" target="_blank" rel="noopener">查看原帖 &#8599;</a>
+          </div>
         </div>
-      </div>
-    </div>`;
+      </td>
+      <td>
+        <div class="spend-indicator">
+          <span class="td-num">\u00a5${n.fee.toFixed(0)}</span>
+          <div class="spend-mini-bar"><div class="fill" style="width:${feePct}%"></div></div>
+        </div>
+      </td>
+      <td class="td-num">${n.impression.toLocaleString()}</td>
+      <td class="td-num">${ctrStr}</td>
+      <td class="td-num ${cpcClass}">${n.cpc > 0 ? '\u00a5' + n.cpc : '-'}</td>
+      <td class="td-num${n.message_consult > 0 ? ' blue' : ''}">${n.message_consult}</td>
+      <td class="td-num${n.msg_leads_num > 0 ? ' good' : ''}">${n.msg_leads_num}</td>
+    </tr>`;
   }).join('');
 }
 
-document.getElementById('tabs').addEventListener('click', e => {
-  const t = e.target.closest('.tab');
-  if (!t) return;
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
-  range = t.dataset.range;
-  renderNotes();
+/* ===== Table Header Sort ===== */
+document.getElementById('notesTable').querySelector('thead').addEventListener('click', e => {
+  const th = e.target.closest('th');
+  if (!th || !th.dataset.key || th.dataset.key === 'rank' || th.dataset.key === 'name') return;
+
+  const key = th.dataset.key;
+  if (sortKey === key) {
+    sortAsc = !sortAsc;
+  } else {
+    sortKey = key;
+    sortAsc = false;
+  }
+
+  // Update header classes
+  document.querySelectorAll('.notes-table thead th').forEach(h => {
+    h.classList.remove('sorted', 'desc', 'asc');
+  });
+  th.classList.add('sorted', sortAsc ? 'asc' : 'desc');
+
+  renderNotesTable();
 });
 
-load();
-setInterval(load, 300000);
+/* ===== Tabs ===== */
+document.getElementById('tabsBar').addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentRange = btn.dataset.range;
+  renderPieChart();
+  renderEngagementChart();
+  renderNotesTable();
+});
+
+/* ===== Search ===== */
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value.trim();
+  renderNotesTable();
+});
+
+/* ===== Resize ===== */
+window.addEventListener('resize', () => {
+  chartTrend && chartTrend.resize();
+  chartCtrCpc && chartCtrCpc.resize();
+  chartMsgLeads && chartMsgLeads.resize();
+  chartPie && chartPie.resize();
+  chartEngagement && chartEngagement.resize();
+});
+
+/* ===== Init ===== */
+loadData();
 </script>
 </body>
 </html>
