@@ -495,10 +495,13 @@ def generate_ai_commentary(account: dict, daily_trend: list[dict], notes_all: li
     )
 
     # Try Claude CLI first (cheapest, fastest)
+    claude_bin = os.path.expanduser("~/.npm-global/bin/claude")
+    if not os.path.exists(claude_bin):
+        claude_bin = "claude"  # fallback to PATH
     try:
         cli_result = subprocess.run(
-            ["claude", "--print", "--model", "sonnet", "-p", prompt],
-            capture_output=True, text=True, timeout=30,
+            [claude_bin, "--print", "--model", "sonnet", "-p", prompt],
+            capture_output=True, text=True, timeout=60,
         )
         if cli_result.returncode == 0 and cli_result.stdout.strip():
             return cli_result.stdout.strip()
@@ -639,10 +642,20 @@ def build_dashboard_data() -> dict:
     print("Building hourly trend from history...")
     hourly_trend = build_hourly_trend()
 
-    # D2: Generate AI commentary
-    print("Generating AI commentary...")
-    ai_commentary = generate_ai_commentary(account_summary, daily_trend, notes_all)
-    print(f"AI commentary: {ai_commentary[:80]}...")
+    # D2: AI commentary — only when --ai-commentary flag is set (daily cron)
+    ai_commentary = ""
+    if "--ai-commentary" in sys.argv:
+        print("Generating AI commentary...")
+        ai_commentary = generate_ai_commentary(account_summary, daily_trend, notes_all)
+        print(f"AI commentary: {ai_commentary[:80]}...")
+    else:
+        # Preserve existing commentary from previous run
+        if DATA_FILE.exists():
+            try:
+                old = json.loads(DATA_FILE.read_text())
+                ai_commentary = old.get("ai_commentary", "")
+            except (json.JSONDecodeError, OSError):
+                pass
 
     return {
         "updated_at": now.isoformat(),
