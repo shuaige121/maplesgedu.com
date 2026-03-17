@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-03-17T23:00:01.254655",
+  "updated_at": "2026-03-18T01:00:01.199673",
   "advertiser": {
     "id": 7463472,
     "name": "UF-SG枫叶留学"
   },
   "account": {
-    "balance": 1689685,
+    "balance": 1686360,
     "daily_budget": 0,
     "today_spend": 0.0,
     "today_impression": 0,
@@ -19,190 +19,6 @@
   "hourly_trend": [
     {
       "hour": "01:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "02:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "03:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "04:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "05:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "06:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "07:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "08:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "09:01",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "10:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "11:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "12:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "13:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "14:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "15:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "16:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "17:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "18:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "19:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "20:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "21:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "22:00",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "23:02",
-      "fee": 0.0,
-      "impression": 0,
-      "click": 0,
-      "message_consult": 0,
-      "msg_leads_num": 0
-    },
-    {
-      "hour": "23:04",
       "fee": 0.0,
       "impression": 0,
       "click": 0,
@@ -285,14 +101,135 @@
   "ranges": {
     "today": {
       "label": "今日",
-      "start": "2026-03-17",
-      "end": "2026-03-17",
-      "notes": []
+      "start": "2026-03-18",
+      "end": "2026-03-18",
+      "notes": [
+        {
+          "note_id": "668a94fd000000001f00533e",
+          "name": "20250628-11篇-SEC_0628_10:40_10",
+          "impression": 26,
+          "click": 3,
+          "fee": 15.58,
+          "message_consult": 0,
+          "initiative_message": 0,
+          "msg_leads_num": 0,
+          "interaction": 0,
+          "like": 0,
+          "collect": 0,
+          "comment": 0,
+          "share": 0,
+          "follow": 0,
+          "ctr": "11.54%",
+          "cpc": 5.19,
+          "cpl": 0,
+          "msg_cost": 0,
+          "fee_pct": 46.9,
+          "msg_to_lead_rate": "N/A",
+          "fee_change_7d": "+0.7%",
+          "efficiency_score": 63.3
+        },
+        {
+          "note_id": "668e1f6400000000250048a3",
+          "name": "20250628-11篇-SEC_0628_10:40_9",
+          "impression": 132,
+          "click": 5,
+          "fee": 13.82,
+          "message_consult": 0,
+          "initiative_message": 0,
+          "msg_leads_num": 0,
+          "interaction": 0,
+          "like": 0,
+          "collect": 0,
+          "comment": 0,
+          "share": 0,
+          "follow": 0,
+          "ctr": "3.79%",
+          "cpc": 2.76,
+          "cpl": 0,
+          "msg_cost": 0,
+          "fee_pct": 41.6,
+          "msg_to_lead_rate": "N/A",
+          "fee_change_7d": "+0.7%",
+          "efficiency_score": 58.2
+        },
+        {
+          "note_id": "667cba67000000001e013df2",
+          "name": "20250628-11篇-SEC_0628_10:40_11",
+          "impression": 15,
+          "click": 1,
+          "fee": 3.85,
+          "message_consult": 0,
+          "initiative_message": 0,
+          "msg_leads_num": 0,
+          "interaction": 0,
+          "like": 0,
+          "collect": 0,
+          "comment": 0,
+          "share": 0,
+          "follow": 0,
+          "ctr": "6.67%",
+          "cpc": 3.85,
+          "cpl": 0,
+          "msg_cost": 0,
+          "fee_pct": 11.6,
+          "msg_to_lead_rate": "N/A",
+          "fee_change_7d": "+0.7%",
+          "efficiency_score": 57.4
+        },
+        {
+          "note_id": "685bcfc0000000001202c37b",
+          "name": "20250628-11篇-SEC_0628_10:40_3",
+          "impression": 1,
+          "click": 0,
+          "fee": 0.0,
+          "message_consult": 0,
+          "initiative_message": 0,
+          "msg_leads_num": 0,
+          "interaction": 0,
+          "like": 0,
+          "collect": 0,
+          "comment": 0,
+          "share": 0,
+          "follow": 0,
+          "ctr": "0.00%",
+          "cpc": 0,
+          "cpl": 0,
+          "msg_cost": 0,
+          "fee_pct": 0.0,
+          "msg_to_lead_rate": "N/A",
+          "fee_change_7d": "+0.7%",
+          "efficiency_score": 25.0
+        },
+        {
+          "note_id": "67f765a900000000090380e0",
+          "name": "20250628-11篇-SEC_0628_10:40_4",
+          "impression": 2,
+          "click": 0,
+          "fee": 0.0,
+          "message_consult": 0,
+          "initiative_message": 0,
+          "msg_leads_num": 0,
+          "interaction": 0,
+          "like": 0,
+          "collect": 0,
+          "comment": 0,
+          "share": 0,
+          "follow": 0,
+          "ctr": "0.00%",
+          "cpc": 0,
+          "cpl": 0,
+          "msg_cost": 0,
+          "fee_pct": 0.0,
+          "msg_to_lead_rate": "N/A",
+          "fee_change_7d": "+0.7%",
+          "efficiency_score": 25.0
+        }
+      ]
     },
     "week": {
       "label": "近7天",
-      "start": "2026-03-10",
-      "end": "2026-03-17",
+      "start": "2026-03-11",
+      "end": "2026-03-18",
       "notes": [
         {
           "note_id": "668e1f6400000000250048a3",
@@ -490,8 +427,8 @@
     },
     "month": {
       "label": "近30天",
-      "start": "2026-02-15",
-      "end": "2026-03-17",
+      "start": "2026-02-16",
+      "end": "2026-03-18",
       "notes": [
         {
           "note_id": "668e1f6400000000250048a3",
@@ -689,8 +626,8 @@
     },
     "all": {
       "label": "全部",
-      "start": "2025-03-17",
-      "end": "2026-03-17",
+      "start": "2025-03-18",
+      "end": "2026-03-18",
       "notes": [
         {
           "note_id": "668e1f6400000000250048a3",
@@ -1415,6 +1352,37 @@
       ]
     }
   },
-  "thumbnails": {},
+  "thumbnails": {
+    "685ead0200000000150226de": "thumbs/685ead0200000000150226de.jpg",
+    "66bdd1ca000000000503bbd7": "thumbs/66bdd1ca000000000503bbd7.jpg",
+    "67f61448000000001200ea8e": "thumbs/67f61448000000001200ea8e.jpg",
+    "66c4c025000000001f019cbc": "thumbs/66c4c025000000001f019cbc.jpg",
+    "6685364b000000001e011fd1": "thumbs/6685364b000000001e011fd1.jpg",
+    "66c64481000000001f01643f": "thumbs/66c64481000000001f01643f.jpg",
+    "67f5ce1a000000000f038872": "thumbs/67f5ce1a000000000f038872.jpg",
+    "6894675900000000020019be": "thumbs/6894675900000000020019be.jpg",
+    "67f4d1790000000009039f8f": "thumbs/67f4d1790000000009039f8f.jpg",
+    "67f72583000000000b0167b9": "thumbs/67f72583000000000b0167b9.jpg",
+    "682c23fe000000000303cd16": "thumbs/682c23fe000000000303cd16.jpg",
+    "6683d72a000000001e01383b": "thumbs/6683d72a000000001e01383b.jpg",
+    "68725e0c0000000017037fa1": "thumbs/68725e0c0000000017037fa1.jpg",
+    "6720e64b000000003c0149df": "thumbs/6720e64b000000003c0149df.jpg",
+    "685bcfc0000000001202c37b": "thumbs/685bcfc0000000001202c37b.jpg",
+    "689581470000000004007dcf": "thumbs/689581470000000004007dcf.jpg",
+    "68919ed300000000050052c2": "thumbs/68919ed300000000050052c2.jpg",
+    "67f765a900000000090380e0": "thumbs/67f765a900000000090380e0.jpg",
+    "667cba67000000001e013df2": "thumbs/667cba67000000001e013df2.jpg",
+    "6891a3d5000000000403d173": "thumbs/6891a3d5000000000403d173.jpg",
+    "668e1f6400000000250048a3": "thumbs/668e1f6400000000250048a3.jpg",
+    "67dccca7000000001d014c1b": "thumbs/67dccca7000000001d014c1b.jpg",
+    "67dbcd77000000000900d538": "thumbs/67dbcd77000000000900d538.jpg",
+    "66c8b412000000001f03c11e": "thumbs/66c8b412000000001f03c11e.jpg",
+    "685e1a6e00000000120335c0": "thumbs/685e1a6e00000000120335c0.jpg",
+    "66063f5f0000000014006e65": "thumbs/66063f5f0000000014006e65.jpg",
+    "66cc1646000000001f0185b0": "thumbs/66cc1646000000001f0185b0.jpg",
+    "686f5d820000000012021270": "thumbs/686f5d820000000012021270.jpg",
+    "668a94fd000000001f00533e": "thumbs/668a94fd000000001f00533e.jpg",
+    "67edf66f000000000b02fd55": "thumbs/67edf66f000000000b02fd55.jpg"
+  },
   "note_titles": {}
 }
